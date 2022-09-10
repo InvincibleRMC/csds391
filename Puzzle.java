@@ -36,6 +36,21 @@ public class Puzzle {
         return stringPuzzle;
     }
 
+    public void aStar(String string) {
+    }
+
+    public void beam(String string) {
+    }
+
+    public void randomizeState(String string) {
+    }
+
+    public void move(String string) {
+    }
+
+    public void maxNodes(String string) {
+    }
+
     
 
 

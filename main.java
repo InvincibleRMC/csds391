@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Queue;
 import java.util.Stack;
@@ -50,14 +51,31 @@ public class main {
             }
             case "solve":{
                 switch(commandInput[1]){
-                    case "A-Star"
-                    puzzle.
+                    case "A-Star":{
+                    puzzle.aStar(commandInput[2]);
+                    }
+                    case "beam":{
+                    puzzle.beam(commandInput[2]);
+                    }
+                    default:{
+                        throw new InputMismatchException();
+                    }
                 }
             }
+            case "maxNodes":{
+                puzzle.maxNodes(commandInput[1]);
+            }
+            default:{
+                throw new InputMismatchException(); 
+            } 
         }
 
+    }
 
-        
+
+    public static void commandGenerator(){
+
+
     }
 
 }
