@@ -1,7 +1,2 @@
-yeet
-yeth
-fhiesfhs'
-sfhs
-fhiesfhshsf
-
-f
+setState b12 345 678
+printState

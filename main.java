@@ -13,10 +13,11 @@ import java.util.Stack;
 
 public class main {
 
-    static Puzzle puzzle;
+    static Puzzle puzzle = new Puzzle();
     public static void main(String[] args) throws FileNotFoundException {
 
-        
+       // Puzzle p = new Puzzle();
+        // Generate Random?
 
         // maybe try-catch could be more elegant
         String fileName = "input.txt";
@@ -38,7 +39,21 @@ public class main {
         
         switch(commandInput[0]){
             case "setState":{
-                puzzle.setState(commandInput[1]);
+                System.out.println("Setstating");
+
+                int[][] state = new int[commandInput.length-1][commandInput[1].length()];
+                
+                for(int i =0;i<state.length;i++){
+
+                    String[] stateLine = (commandInput[i+1].replace('b', '0')).split("");
+                    for (int j=0;j<state[0].length;j++){
+                       
+                        state[i][j] =  Integer.parseInt(stateLine[j]);
+                        System.out.println(state[i][j]);
+                    }
+                }
+                
+                puzzle.setState(state);
             }
             case "printState":{
                 puzzle.printState();
@@ -74,7 +89,6 @@ public class main {
 
 
     public static void commandGenerator(){
-
 
     }
 
