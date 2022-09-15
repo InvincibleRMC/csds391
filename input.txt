@@ -1,2 +1,3 @@
-setState b12 345 678
+setState 412 3b5 678
+randomizeState 69
 printState

@@ -26,20 +26,27 @@ public class main {
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         BufferedReader input = new BufferedReader(inputStreamReader);
         input.lines().forEach(command -> commandHandler(command));
-      
-
         try {
             input.close();
-        } catch (IOException e) {}
+        } catch (IOException e) {
+           // System.out.println("Finished Command File");
+        }
+        System.out.println(puzzle.checkPuzzle());
+        //System.out.println(puzzle.holeLocation()[0] + " " + puzzle.holeLocation()[1]);
+        
     }
 
     public static void commandHandler(String commandAndInput){
 
         String[] commandInput = commandAndInput.split(" ");
         
+        for(int i =0;i<commandInput.length;i++){
+            System.out.print(commandInput[i] + " ");
+        }
+       System.out.println();
         switch(commandInput[0]){
             case "setState":{
-                System.out.println("Setstating");
+                System.out.println("Setting state");
 
                 int[][] state = new int[commandInput.length-1][commandInput[1].length()];
                 
@@ -49,39 +56,49 @@ public class main {
                     for (int j=0;j<state[0].length;j++){
                        
                         state[i][j] =  Integer.parseInt(stateLine[j]);
-                        System.out.println(state[i][j]);
+                        //System.out.println(state[i][j]);
                     }
                 }
-                
                 puzzle.setState(state);
+                return;
             }
             case "printState":{
                 puzzle.printState();
+                return;
             }
             case "move":{
+                //System.out.println(commandInput[0]);
+                //System.out.println("moving");
                 puzzle.move(commandInput[1]);
+                return;
             }
             case "randomizeState":{
                 puzzle.randomizeState(commandInput[1]);
+                return;
             }
             case "solve":{
                 switch(commandInput[1]){
                     case "A-Star":{
                     puzzle.aStar(commandInput[2]);
+                    return;
                     }
                     case "beam":{
                     puzzle.beam(commandInput[2]);
+                    return;
                     }
                     default:{
-                        throw new InputMismatchException();
+                        System.out.println("Solve command given incorrect parameter.");
+                        return;
                     }
                 }
             }
             case "maxNodes":{
                 puzzle.maxNodes(commandInput[1]);
+                return;
             }
             default:{
-                throw new InputMismatchException(); 
+                System.out.println("Not valid command.");
+                return;
             } 
         }
 
