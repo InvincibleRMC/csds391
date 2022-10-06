@@ -134,7 +134,7 @@ public class Puzzle {
         }
         int[] swapLocation = new int[] { x, y };
         if (this.validSwap(swapLocation)) {
-            this.swap(holeLocation(), swapLocation);
+            this.swap(swapLocation);
         } else {
             System.out.println("Cannot move edge in the way.");
         }
@@ -152,11 +152,11 @@ public class Puzzle {
         return true;
     }
 
-    public void swap(int[] firstSpot, int[] secondSpot) {
+    public void swap( int[] swapLocation) {
         // System.out.println("swapping");
-        int temp = this.data[firstSpot[0]][firstSpot[1]];
-        this.data[firstSpot[0]][firstSpot[1]] = this.data[secondSpot[0]][secondSpot[1]];
-        this.data[secondSpot[0]][secondSpot[1]] = temp;
+        int temp = this.data[holeLocationX()][holeLocationY()];
+        this.data[holeLocationX()][holeLocationY()] = this.data[swapLocation[0]][swapLocation[1]];
+        this.data[swapLocation[0]][swapLocation[1]] = temp;
     }
 
     public int holeLocationX() {
