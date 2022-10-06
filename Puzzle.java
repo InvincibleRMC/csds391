@@ -1,7 +1,11 @@
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
+
+import javax.xml.crypto.dsig.keyinfo.RetrievalMethod;
 
 public class Puzzle {
     
@@ -24,13 +28,32 @@ public class Puzzle {
     data = new int[n][n];
     pastPuzzle = new HashSet<>(factorial(width*length)/2);
     }
+
     public Puzzle(){
     }
+
     public Puzzle(Puzzle p){
-        width = p.width;
-        length = p.length;
-        data = p.data;
-        pastPuzzle = p.pastPuzzle;
+        this.width = p.width;
+        this.length = p.length;
+        this.data = p.data;
+        this.pastPuzzle = p.pastPuzzle;
+    }
+    public Puzzle(String stringState){
+        
+        String[] commandInput = stringState.split(" ");
+        for(int i =0;i<commandInput.length;i++){
+            System.out.print(commandInput[i] + " ");
+        }
+
+        int[][] state = new int[commandInput.length][commandInput[1].length()];
+                for(int i =0;i<state.length;i++){
+
+                    String[] stateLine = (commandInput[i].replace('b', '0')).split("");
+                    for (int j=0;j<state[0].length;j++){
+                        state[i][j] =  Integer.parseInt(stateLine[j]);
+                    }
+                }
+        this.setState(state);
     }
 
     // for now assuming it will be given legal state
@@ -64,16 +87,7 @@ public class Puzzle {
     // b12
     // 345
     // 678
-    public boolean checkPuzzle(){
-        for(int i=0;i<length;i++){
-            for(int j=0;j<width;j++){
-                if(data[i][j] != i*length+j){
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
+    
     
 
     public void printState(){
@@ -118,8 +132,8 @@ public class Puzzle {
                 return;
             }
         }
-        if(validSwap(swapLocation)){
-            swap(holeLocation(), swapLocation);
+        if(this.validSwap(swapLocation)){
+            this.swap(holeLocation(), swapLocation);
         }
         else{
             System.out.println("Cannot move edge in the way.");
@@ -138,9 +152,10 @@ public class Puzzle {
     }
 
     public void swap(int[] firstSpot,int[] secondSpot){
-        int temp = data[firstSpot[0]][firstSpot[1]];
-        data[firstSpot[0]][firstSpot[1]] = data[secondSpot[0]][secondSpot[1]];
-        data[secondSpot[0]][secondSpot[1]] = temp;
+        //System.out.println("swapping");
+        int temp = this.data[firstSpot[0]][firstSpot[1]];
+        this.data[firstSpot[0]][firstSpot[1]] = this.data[secondSpot[0]][secondSpot[1]];
+        this.data[secondSpot[0]][secondSpot[1]] = temp;
     }
 
     public int holeLocationX(){
@@ -160,6 +175,7 @@ public class Puzzle {
         }
         //Somehow doesn't find blank spot
         // should probably throw an error
+        System.out.println("COULDN'T find hole");
         return new int[] {-10,-10};
     }
     public void randomizeState(String times) {
@@ -170,6 +186,7 @@ public class Puzzle {
         }
     }
 
+    /* 
     public Puzzle[] generatePuzzle(){
         
         String[] moveOptions = new String[] {"up","left","right","down"};
@@ -184,14 +201,68 @@ public class Puzzle {
        
         return puzzles;
     }
-
-    public boolean visted(Puzzle p){
-        return pastPuzzle.contains(p);
+*/
+    public boolean visted(){
+        return pastPuzzle.contains(this);
     }
     
-
+    /* 
     public void ezMethod(){
         //Queue q = new Queue<>();
+    }
+    */
+
+    public Puzzle[] childrenPuzzles(){
+        System.out.println("getting Children");
+        String[] moveOptions = new String[] {"up","left","right","down"};
+        LinkedList<Puzzle> puzzles = new LinkedList<Puzzle>();
+       // Puzzle[] puzzles = new Puzzle[moveOptions.length];
+        for(int i =0; i < moveOptions.length ;i++){
+            
+                Puzzle movedP = new Puzzle(this);
+                Puzzle p = new Puzzle(movedP);
+                p.printState();
+                movedP.printState();
+                movedP.move(moveOptions[i]);
+                System.out.println("Moving " + moveOptions[i]);
+                p.printState();
+                movedP.printState();
+                if(!p.equals(movedP) ){
+                    puzzles.add(movedP);
+                    System.out.println("added");
+                }
+                //p=null;
+                
+        }
+        System.out.println(puzzles.toString());
+        return puzzles.toArray(new Puzzle[puzzles.size()]);
+    }
+    public void bfs(){
+        Queue<Puzzle> q = new LinkedList<>();
+        q.add(this);
+        while(q.size()>0){
+            Puzzle p =q.poll();
+            if(p.solved()){
+                return;
+            }
+            Puzzle[] puzzles = p.childrenPuzzles();
+            
+            System.out.println(puzzles.length);
+            System.out.println(puzzles[0].toString());
+            for(int i =0;i<puzzles.length;i++){
+                if(!puzzles[i].visted()){
+                     q.add(puzzles[i]);
+                }
+            }
+        }
+
+
+        try {
+            throw new Exception();
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
     public void aStar(String string) {
     }
@@ -201,7 +272,32 @@ public class Puzzle {
 
     public void maxNodes(String string) {
     }
+
+    public boolean equals(Puzzle p){
+        for(int i=0;i<length;i++){
+            for(int j=0;j<width;j++){
+                if(this.data[i][j] != p.data[i][j]){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
     
-   
+    // could be special case of equals
+    public boolean solved(){
+        for(int i=0;i<length;i++){
+            for(int j=0;j<width;j++){
+                if(data[i][j] != i*length+j){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+   public boolean optimal(){
+    return true;
+   }
 
 }
