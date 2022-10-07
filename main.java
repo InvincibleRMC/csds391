@@ -78,7 +78,7 @@ public class main {
             System.out.println("hopefully solved");
             astarh1.printStateVerbose();
             
-            if(!astarh1.solved() && !astarh1.optimal(bfs)){
+            if(!astarh1.solved() || !astarh1.optimal(bfs)){
                 throw new Exception();
             }
 

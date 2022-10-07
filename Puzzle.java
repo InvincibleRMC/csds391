@@ -481,7 +481,7 @@ public class Puzzle {
 
     public boolean optimal(Puzzle bfs) {
        // random.bfs();
-        return bfs.moveMadeTo.equals(moveMadeTo) || bfs.g == this.g;
+        return  bfs.g == this.g;
     }
 
 }
