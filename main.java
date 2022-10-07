@@ -20,7 +20,7 @@ public class main {
     public static void main(String[] args) throws FileNotFoundException {
 
         try {
-            test();
+            System.out.println(test());
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -33,48 +33,55 @@ public class main {
 
     
     public static boolean test() throws Exception{
-
-        boolean bfsTest = true;
         String startingState ="012 345 678";
-        for(int i =0;i<10;i++){
+        
+        //bfs testing
+        boolean bfsTest = true;
+        for(int i =0;i<1;i++){
+            Puzzle random = new Puzzle(startingState);
 
-            Puzzle p = new Puzzle(startingState);
-            p.printState();
-           // System.out.println(p.solved());
-            p.randomizeState("20");
-            System.out.println("\n\n\n Starting Solve");
-            p.bfs();
-            p.printState();
-            if(!p.solved()){
+            //p.printState();
+            System.out.print(random.pastPuzzle.toString());
+            // System.out.println(p.solved());
+
+            random.randomizeState(100);
+
+            Puzzle bfs = new Puzzle(random);
+            Puzzle astarh1 = new Puzzle(random);
+
+
+            System.out.println("Starting Solve\n\n\n");
+            bfs.bfs();
+
+            random.printStateVerbose();
+            bfs.printStateVerbose();
+            //System.out.println(p.g);
+            if(!bfs.solved()){
                 throw new Exception();
             }
+            System.out.println("Bfs done");
+
+            System.out.println("A* h1");
+            //A*
+            
+           // System.out.print(astarh1.pastPuzzle.toString());
+            astarh1.printState();
+            // System.out.println(p.solved());
+            //Puzzle random = new Puzzle(p);
+
+            System.out.println("Starting Solve\n\n\n ");
+            astarh1.aStar("h1");
+            System.out.print("Starting State");
+            random.printStateVerbose();
+            System.out.println("hopefully solved");
+            astarh1.printStateVerbose();
+            
+            if(!astarh1.solved() && !astarh1.optimal(bfs)){
+                throw new Exception();
+            }
+
         }
 
-
-
-/*
-        File inputFile = new File("test.txt");
-
-
-       
-
-
-
-
-
-        
-        FileInputStream inputStream = new FileInputStream(inputFile);
-        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-        BufferedReader input = new BufferedReader(inputStreamReader);
-        input.lines().forEach(command -> commandHandler(command));
-        try {
-            input.close();
-        } catch (IOException e) {
-           // System.out.println("Finished Command File");
-        }
-        System.out.println(puzzle.checkPuzzle());
-        //System.out.println(puzzle.holeLocation()[0] + " " + puzzle.holeLocation()[1]);
- */
         return bfsTest;
     }
 

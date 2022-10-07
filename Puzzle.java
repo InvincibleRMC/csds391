@@ -1,32 +1,35 @@
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.Random;
 import java.util.Set;
-
-import javax.xml.crypto.dsig.keyinfo.RetrievalMethod;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Puzzle {
 
     private int width;
     private int length;
     private int[][] data;
-    private HashSet pastPuzzle;
-    private String moveMadeTo;
+    public HashSet<Puzzle> pastPuzzle;
+    private String moveMadeTo ="";
+    private int g =0;
 
     public Puzzle(int width, int length) {
         this.width = width;
         this.length = length;
         data = new int[width][length];
-        pastPuzzle = new HashSet<>(factorial(width * length) / 2);
+        pastPuzzle = new HashSet<Puzzle>(factorial(width * length) / 2);
     }
 
     public Puzzle(int n) {
         width = n;
         length = n;
         data = new int[n][n];
-        pastPuzzle = new HashSet<>(factorial(width * length) / 2);
+        pastPuzzle = new HashSet<Puzzle>(factorial(width * length) / 2);
     }
 
     public Puzzle() {
@@ -35,8 +38,14 @@ public class Puzzle {
     public Puzzle(Puzzle p) {
         this.width = p.width;
         this.length = p.length;
-        this.data = p.data;
+        data = new int[p.data.length][];
+        for(int i = 0; i < p.data.length; i++){
+            data[i] = p.data[i].clone();
+        }
+        //this.data = p.data.clone();
         this.pastPuzzle = p.pastPuzzle;
+        this.g = p.g;
+        this.moveMadeTo = p.moveMadeTo;
     }
 
     public Puzzle(String stringState) {
@@ -62,7 +71,20 @@ public class Puzzle {
         length = state.length;
         width = state[0].length;
         data = state;
-        pastPuzzle = new HashSet<>(factorial(width * length) / 2);
+        pastPuzzle = new HashSet<Puzzle>(factorial(width * length) / 2);
+    }
+    public void setState(Puzzle p) {
+        int[][] state = p.data;
+        length = state.length;
+        width = state[0].length;
+        data = state;
+        pastPuzzle.clear();
+        g=p.g;
+        moveMadeTo = p.moveMadeTo;
+    }
+
+    public void resetHashSet(){
+        pastPuzzle = new HashSet<Puzzle>(factorial(width * length) / 2);
     }
 
     public int factorial(int n) {
@@ -92,6 +114,10 @@ public class Puzzle {
 
     public void printState() {
         System.out.println(toString());
+    }
+
+    public void printStateVerbose() {
+        System.out.println(toString() + "Path length= " + g + " Path= " + moveMadeTo);
     }
 
     public String toString() {
@@ -133,8 +159,8 @@ public class Puzzle {
             }
         }
         int[] swapLocation = new int[] { x, y };
-        if (this.validSwap(swapLocation)) {
-            this.swap(swapLocation);
+        if (validSwap(swapLocation)) {
+            swap(swapLocation);
         } else {
             System.out.println("Cannot move edge in the way.");
         }
@@ -152,11 +178,11 @@ public class Puzzle {
         return true;
     }
 
-    public void swap( int[] swapLocation) {
+    public void swap(int[] swapLocation) {
         // System.out.println("swapping");
-        int temp = this.data[holeLocationX()][holeLocationY()];
-        this.data[holeLocationX()][holeLocationY()] = this.data[swapLocation[0]][swapLocation[1]];
-        this.data[swapLocation[0]][swapLocation[1]] = temp;
+        int temp = data[holeLocationX()][holeLocationY()];
+        data[holeLocationX()][holeLocationY()] = data[swapLocation[0]][swapLocation[1]];
+        data[swapLocation[0]][swapLocation[1]] = temp;
     }
 
     public int holeLocationX() {
@@ -182,10 +208,16 @@ public class Puzzle {
     }
 
     public void randomizeState(String times) {
+        randomizeState(Integer.parseInt(times));
+    }
+
+    public void randomizeState(int n){
         String[] moveOptions = new String[] { "up", "left", "right", "down" };
-        int n = Integer.parseInt(times);
+        //todo add seeding
+        Random r = new Random();
         for (int i = 0; i <= n; i++) {
-            move(moveOptions[(int) (Math.random() * 4)]);
+            //r.randInt()
+            move(moveOptions[ThreadLocalRandom.current().nextInt(0, moveOptions.length)]);
         }
     }
 
@@ -205,6 +237,8 @@ public class Puzzle {
      * return puzzles;
      * }
      */
+
+     //TODO Delete
     public boolean visted() {
         return pastPuzzle.contains(this);
     }
@@ -216,25 +250,24 @@ public class Puzzle {
      */
 
     public Puzzle[] childrenPuzzles() {
-        System.out.println("getting Children");
+       // System.out.println("getting Children");
         String[] moveOptions = new String[] { "up", "left", "right", "down" };
         LinkedList<Puzzle> puzzles = new LinkedList<Puzzle>();
         // Puzzle[] puzzles = new Puzzle[moveOptions.length];
         for (int i = 0; i < moveOptions.length; i++) {
 
             Puzzle movedP = new Puzzle(this);
-            this.printState();
-            movedP.printState();
+           
             movedP.move(moveOptions[i]);
-            System.out.println("Moving " + moveOptions[i]);
-            this.printState();
-            movedP.printState();
+           
             if (!this.equals(movedP)) {
+                movedP.moveMadeTo = movedP.moveMadeTo + " " + moveOptions[i];
+                movedP.g++;
                 puzzles.add(movedP);
-                System.out.println("added");
+               
             }
         }
-        System.out.println(puzzles.toString());
+       // System.out.println(puzzles.toString());
         return puzzles.toArray(new Puzzle[puzzles.size()]);
     }
 
@@ -243,16 +276,17 @@ public class Puzzle {
         q.add(this);
         while (q.size() > 0) {
             Puzzle p = q.poll();
+            System.out.println("Current puzzle is" + p.toString());
             if (p.solved()) {
+                this.setState(p);
                 return;
             }
             Puzzle[] puzzles = p.childrenPuzzles();
-
-            System.out.println(puzzles.length);
-            System.out.println(puzzles[0].toString());
             for (int i = 0; i < puzzles.length; i++) {
-                if (!puzzles[i].visted()) {
+                //puzzles[i].printStateVerbose();
+                if (!pastPuzzle.contains(puzzles[i])) {
                     q.add(puzzles[i]);
+                    pastPuzzle.add(puzzles[i]);
                 }
             }
         }
@@ -265,7 +299,88 @@ public class Puzzle {
         }
     }
 
-    public void aStar(String string) {
+    
+        Comparator<Puzzle> comparatorh1 = new Comparator<Puzzle>(){
+
+            @Override
+            public int compare(Puzzle p1, Puzzle p2) {
+                return p1.g+p1.h1() <= p2.g+p2.h1() ? -1:1;
+            }
+        };
+        Comparator<Puzzle> comparatorh2 = new Comparator<Puzzle>(){
+
+            @Override
+            public int compare(Puzzle p1, Puzzle p2) {
+                return p1.g+p1.h2() <= p2.g+p2.h2() ? -1:1;
+            }
+        };
+        
+
+    public int h1(){
+        int misplaceTiles = 0;
+        for (int i = 0; i < length; i++) {
+            for (int j = 0; j < width; j++) {
+                if(data[i][j] == 0) continue;
+                if (data[i][j] != i * length + j) {
+                    misplaceTiles++;
+                }
+            }
+        }
+        return misplaceTiles;
+    }
+    public int h2(){
+        return -1;
+    }
+
+    public void aStar(String heuristic) {
+        Comparator<Puzzle> comparator;
+        switch(heuristic){
+            case "h1":{
+                comparator = comparatorh1;
+                break;
+            }
+            case "h2":{
+                comparator = comparatorh2;
+                break;
+            }
+            default:{
+                System.out.println("No heuristic fiven defaulting to h1");
+                comparator = comparatorh1;
+                break;
+            }
+        }
+        PriorityQueue<Puzzle> q = new PriorityQueue<Puzzle>(comparator);
+        q.add(this);
+        while(q.size()>0){
+       
+            Puzzle p = q.poll();
+            System.out.println("Current puzzle is");
+            p.printStateVerbose();
+            if (p.solved()) {
+                //System.out.println("found " + p.toString());
+                this.setState(p);
+                return;
+            }
+            Puzzle[] puzzles = p.childrenPuzzles();
+          //  p.printState();
+           // System.out.println(puzzles.length);
+            //System.out.println(puzzles[0].toString());
+            for (int i = 0; i < puzzles.length; i++) {
+                //puzzles[i].printState();
+               // System.out.println(pastPuzzle.toString());
+                if (!pastPuzzle.contains(puzzles[i])) {
+                    q.add(puzzles[i]);
+                    pastPuzzle.add(puzzles[i]);
+                }
+            }
+        }
+
+        try {
+            throw new Exception();
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     public void beam(String string) {
@@ -274,7 +389,42 @@ public class Puzzle {
     public void maxNodes(String string) {
     }
 
-    public boolean equals(Puzzle p) {
+    @Override
+    public int hashCode(){
+        if (data == null) {
+            return 0;
+        }
+        int result = 1;
+        int h = data.length;
+        int w = data[0].length;
+        int value = 0;
+        for (int i = 0; i < h; i++) {
+            for (int j = 0; j < w; j++) {
+                value = data[i][j];
+                int elementHash = (value ^ (value >>> 32));
+                result = 31 * result + elementHash;
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if(o == this){
+            return true;
+        }
+        if(o == null || o.getClass() != this.getClass()){
+            return false;
+        }
+
+        Puzzle p = (Puzzle) o;
+        if(length!=p.length){
+            return false;
+        }
+        if(width!=p.width){
+            return false;
+        }
+
         for (int i = 0; i < length; i++) {
             for (int j = 0; j < width; j++) {
                 if (this.data[i][j] != p.data[i][j]) {
@@ -282,7 +432,7 @@ public class Puzzle {
                 }
             }
         }
-        return true;
+        return true ;
     }
 
     // could be special case of equals
@@ -297,8 +447,9 @@ public class Puzzle {
         return true;
     }
 
-    public boolean optimal() {
-        return true;
+    public boolean optimal(Puzzle bfs) {
+       // random.bfs();
+        return bfs.moveMadeTo.equals(this.moveMadeTo) && bfs.g == this.g;
     }
 
 }
