@@ -34,7 +34,8 @@ public class main {
     
     public static boolean test() throws Exception{
         String startingState ="012 345 678";
-        
+        String startingState15="154 028 736"; 
+        //startingState=startingState15;
         //bfs testing
         boolean bfsTest = true;
         for(int i =0;i<1;i++){
@@ -45,6 +46,7 @@ public class main {
             // System.out.println(p.solved());
 
             random.randomizeState(100);
+            random = new Puzzle(startingState15);
 
             Puzzle bfs = new Puzzle(random);
             Puzzle astarh1 = new Puzzle(random);
@@ -53,7 +55,7 @@ public class main {
             System.out.println("Starting Solve\n\n\n");
             bfs.bfs();
 
-            random.printStateVerbose();
+            random.printState();
             bfs.printStateVerbose();
             //System.out.println(p.g);
             if(!bfs.solved()){
@@ -72,7 +74,7 @@ public class main {
             System.out.println("Starting Solve\n\n\n ");
             astarh1.aStar("h1");
             System.out.print("Starting State");
-            random.printStateVerbose();
+            random.printState();
             System.out.println("hopefully solved");
             astarh1.printStateVerbose();
             
@@ -174,21 +176,6 @@ public class main {
 
     }
 
-    /* 
-    public static void commandGenerator(File inputFile) throws IOException{
-        FileWriter writer = new FileWriter(inputFile);
-        BufferedWriter bWriter = new BufferedWriter(writer);
-        String startingState = "setState b12 345 678";
-        bWriter.write(startingState, 0, startingState.length());
-        int random = 70;
-        String randomizeState = "randomizeState " + random;
-        bWriter.write(randomizeState, 0, randomizeState.length());
-
-
-        bWriter.close();
-
-    }
-*/
 }
 
 

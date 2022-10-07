@@ -249,6 +249,40 @@ public class Puzzle {
      * }
      */
 
+     public boolean validMove(String direction){
+        int x = holeLocationX();
+        int y = holeLocationY();
+        switch (direction) {
+            case "up": {
+                x--;
+                break;
+            }
+            case "left": {
+                y--;
+                break;
+            }
+            case "right": {
+                y++;
+                break;
+            }
+            case "down": {
+                x++;
+                break;
+            }
+            default: {
+                System.out.println("Not a valid move direction");
+                try {
+                    throw new Exception();
+                } catch (Exception e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+        }
+        int[] swapLocation = new int[] { x, y };
+        return validSwap(swapLocation);
+     }
+
     public Puzzle[] childrenPuzzles() {
        // System.out.println("getting Children");
         String[] moveOptions = new String[] { "up", "left", "right", "down" };
@@ -258,13 +292,11 @@ public class Puzzle {
 
             Puzzle movedP = new Puzzle(this);
            
-            movedP.move(moveOptions[i]);
-           
-            if (!this.equals(movedP)) {
+            if(validMove(moveOptions[i])){
+                movedP.move(moveOptions[i]);
                 movedP.moveMadeTo = movedP.moveMadeTo + " " + moveOptions[i];
                 movedP.g++;
                 puzzles.add(movedP);
-               
             }
         }
        // System.out.println(puzzles.toString());
@@ -449,7 +481,7 @@ public class Puzzle {
 
     public boolean optimal(Puzzle bfs) {
        // random.bfs();
-        return bfs.moveMadeTo.equals(this.moveMadeTo) && bfs.g == this.g;
+        return bfs.moveMadeTo.equals(moveMadeTo) || bfs.g == this.g;
     }
 
 }
