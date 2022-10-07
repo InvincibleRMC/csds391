@@ -276,7 +276,7 @@ public class Puzzle {
         q.add(this);
         while (q.size() > 0) {
             Puzzle p = q.poll();
-            System.out.println("Current puzzle is" + p.toString());
+            //System.out.println("Current puzzle is" + p.toString());
             if (p.solved()) {
                 this.setState(p);
                 return;
@@ -354,8 +354,8 @@ public class Puzzle {
         while(q.size()>0){
        
             Puzzle p = q.poll();
-            System.out.println("Current puzzle is");
-            p.printStateVerbose();
+            //System.out.println("Current puzzle is");
+           // p.printStateVerbose();
             if (p.solved()) {
                 //System.out.println("found " + p.toString());
                 this.setState(p);
