@@ -36,10 +36,6 @@
         public Puzzle(String stringState) {
 
             String[] commandInput = stringState.split(" ");
-            for (int i = 0; i < commandInput.length; i++) {
-                System.out.print(commandInput[i] + " ");
-            }
-
             int[][] state = new int[commandInput.length][commandInput[1].length()];
             for (int i = 0; i < state.length; i++) {
 
@@ -48,16 +44,13 @@
                     state[i][j] = Integer.parseInt(stateLine[j]);
                 }
             }
-            this.setState(state);
-        }
-
-        // for now assuming it will be given legal state
-        public void setState(int[][] state) {
             length = state.length;
             width = state[0].length;
             data = state;
             pastPuzzle = new HashSet<Puzzle>(factorial(width * length) / 2);
+        
         }
+
         public void setState(Puzzle p) {
             int[][] state = p.data;
             length = state.length;
@@ -418,9 +411,10 @@
         }
     }
 
-        public void maxNodes(String string) {
-            maxNode = Integer.parseInt(string);
-        }
+    //Sets the maximum amount of nodes an algorithm can search
+    public void maxNodes(String string) {
+        maxNode = Integer.parseInt(string);
+    }
 
         @Override
         public int hashCode(){
