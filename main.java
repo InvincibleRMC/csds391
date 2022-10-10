@@ -42,15 +42,10 @@ public class main {
             random.randomizeState(100);
             random = Puzzle.createFromString(startingState15);
 
-            Puzzle bfs = Puzzle.copy(random);
-            Puzzle astarh1 = Puzzle.copy(random);
-            Puzzle astarh2 = Puzzle.copy(random);
-            Puzzle beam = Puzzle.copy(random);
-
             System.out.println("Starting Solve\n\n\n");
 
             long startBFS = System.nanoTime();
-            bfs.bfs();
+            Puzzle bfs = random.bfs();
             long diffBFS = System.nanoTime()-startBFS;
 
             random.printState();
@@ -65,14 +60,14 @@ public class main {
             //A*
             
            // System.out.print(astarh1.pastPuzzle.toString());
-            astarh1.printState();
+            //astarh1.printState();
             // System.out.println(p.solved());
             //Puzzle random = new Puzzle(p);
 
             System.out.println("Starting Solve\n\n\n ");
 
             long startAStarh1 =System.nanoTime();
-            astarh1.aStar("h1");
+            Puzzle astarh1 = random.aStar("h1");
             long diffAStarh1 = System.nanoTime()-startAStarh1;
             
             System.out.print("Starting State");
@@ -88,12 +83,12 @@ public class main {
             //A*
             
            // System.out.print(astarh1.pastPuzzle.toString());
-            astarh2.printState();
+            //astarh2.printState();
 
             System.out.println("Starting Solve\n\n\n ");
 
             long startAStarh2 = System.nanoTime();
-            astarh2.aStar("h2");
+            Puzzle astarh2 = random.aStar("h2");
             long diffAStarh2 = System.nanoTime()-startAStarh2;
 
             System.out.print("Starting State");
@@ -108,12 +103,12 @@ public class main {
             //A*
             
            // System.out.print(astarh1.pastPuzzle.toString());
-           beam.printState();
+           //beam.printState();
 
             System.out.println("Starting Solve\n\n\n ");
 
             long startBeam = System.nanoTime();
-            beam.beam("5");
+            Puzzle beam = random.beam("5");
             long diffBeam = System.nanoTime()-startBeam;
 
             System.out.print("Starting State");

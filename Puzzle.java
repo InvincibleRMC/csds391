@@ -28,11 +28,6 @@
             this.nodeCount=nodeCount;
         }
 
-        // Copy Constructor of a Puzzle
-        public static Puzzle copy(Puzzle p) {
-           
-            return new Puzzle(p.width,p.length,copyData(p),p.moveMadeTo,p.g,p.nodeCount);
-        }
         private static int[][] copyData(Puzzle p){
             int[][] data = new int[p.data.length][];
             for(int i = 0; i < p.data.length; i++){
@@ -43,7 +38,6 @@
 
         // Copy Constructor of a Puzzle with 
         public static Puzzle move(Puzzle p, String direction) {
-        
             String moveMadeTo = p.moveMadeTo + " " + direction;
             int pathCost =p.g+1;
             Puzzle puzzle = new Puzzle(p.width,p.length,copyData(p),moveMadeTo,pathCost,p.nodeCount);
@@ -278,10 +272,12 @@
             q.add(this);
             while (q.size() > 0) {
                 Puzzle p = q.poll();
+                //p.printStateVerbose();
                 if (p.solved()) {
                    return p;
                 }
                 Puzzle[] puzzles = p.childrenPuzzles();
+
                 for (int i = 0; i < puzzles.length; i++) {
                     if (!pastPuzzles.contains(puzzles[i])) {
                         q.add(puzzles[i]);
