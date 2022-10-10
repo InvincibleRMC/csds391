@@ -8,30 +8,53 @@
 
     final class Puzzle {
 
+        private static int maxNode = Integer.MAX_VALUE;
+        private static final String[] moveOptions = new String[] { "up", "left", "right", "down" };
         private final int width;
         private final int length;
-        private int[][] data;
-        private HashSet<Puzzle> pastPuzzle;
-        private String moveMadeTo ="";
-        private int g = 0;
-        private int maxNode = Integer.MAX_VALUE;
-        private int nodeCount = 0;
+        private final int[][] data;
+        //private final HashSet<Puzzle> pastPuzzle;
+        private final String moveMadeTo;
+        // Path Cost
+        private final int g;
+        private final int nodeCount;
+
+        private Puzzle(int width,int length, int[][] data, String moveMadeTo, int g,int nodeCount){
+            this.width=width;
+            this.length=length;
+            this.data = data;
+            this.moveMadeTo = moveMadeTo;
+            this.g=g;
+            this.nodeCount=nodeCount;
+        }
 
         // Copy Constructor of a Puzzle
-        public Puzzle(Puzzle p) {
-            this.width = p.width;
-            this.length = p.length;
-            data = new int[p.data.length][];
+        public static Puzzle copy(Puzzle p) {
+           
+            return new Puzzle(p.width,p.length,copyData(p),p.moveMadeTo,p.g,p.nodeCount);
+        }
+        private static int[][] copyData(Puzzle p){
+            int[][] data = new int[p.data.length][];
             for(int i = 0; i < p.data.length; i++){
                 data[i] = p.data[i].clone();
             }
-            this.pastPuzzle = p.pastPuzzle;
-            this.g = p.g;
-            this.moveMadeTo = p.moveMadeTo;
+            return data;
         }
 
+        // Copy Constructor of a Puzzle with 
+        public static Puzzle move(Puzzle p, String direction) {
+        
+            String moveMadeTo = p.moveMadeTo + " " + direction;
+            int pathCost =p.g+1;
+            Puzzle puzzle = new Puzzle(p.width,p.length,copyData(p),moveMadeTo,pathCost,p.nodeCount);
+            puzzle.move(direction);
+            return puzzle;
+        }
+
+    
+
         // Creates a Puzzle based off a given string state
-        public Puzzle(String stringState) {
+        public static Puzzle createFromString(String stringState) {
 
             String[] commandInput = stringState.split(" ");
             int[][] state = new int[commandInput.length][commandInput[1].length()];
@@ -42,19 +65,12 @@
                     state[i][j] = Integer.parseInt(stateLine[j]);
                 }
             }
-            length = state.length;
-            width = state[0].length;
-            data = state;
-            pastPuzzle = new HashSet<Puzzle>(factorial(width * length) / 2);
-        
-        }
-
-        public void setState(Puzzle p) {
-            int[][] state = p.data;
-            data = state;
-            pastPuzzle.clear();
-            g=p.g;
-            moveMadeTo = p.moveMadeTo;
+            int length = state.length;
+            int width = state[0].length;
+            int g=0;
+            int nodeCount = 0;
+            String moveMadeTo="";
+            return new Puzzle(width, length, state, moveMadeTo, g, nodeCount);
         }
 
         //Calculates the factorial of a number
@@ -191,7 +207,7 @@
 
         // Randomizes a state n times
         public void randomizeState(int n){
-            String[] moveOptions = new String[] { "up", "left", "right", "down" };
+           
             //todo add seeding
             Random r = new Random();
             for (int i = 0; i <= n; i++) {
@@ -236,60 +252,57 @@
                 System.out.println( "Exceeded maximum node count!");
             }
 
-            String[] moveOptions = new String[] { "up", "left", "right", "down" };
+           // String[] moveOptions = new String[] { "up", "left", "right", "down" };
             LinkedList<Puzzle> puzzles = new LinkedList<Puzzle>();
             
             for (int i = 0; i < moveOptions.length; i++) {
 
-                Puzzle movedP = new Puzzle(this);
-            
                 if(validMove(moveOptions[i])){
-                    movedP.move(moveOptions[i]);
-                    movedP.moveMadeTo = movedP.moveMadeTo + " " + moveOptions[i];
-                    movedP.g++;
-                    puzzles.add(movedP);
+                    puzzles.add(Puzzle.move(this,moveOptions[i]));
                 }
             }
         // System.out.println(puzzles.toString());
             return puzzles.toArray(new Puzzle[puzzles.size()]);
-            }
+        }
+
+
+        // returns the stateSpaceSize of a puzzle
+        private int stateSpaceSize(){
+            return factorial(width*length)/2;
+        }
 
         // Breadth First Search
-        public void bfs() {
+        public Puzzle bfs() {
+            HashSet<Puzzle> pastPuzzles = new HashSet<Puzzle>(stateSpaceSize());
             Queue<Puzzle> q = new LinkedList<>();
             q.add(this);
             while (q.size() > 0) {
                 Puzzle p = q.poll();
-                //System.out.println("Current puzzle is" + p.toString());
                 if (p.solved()) {
-                    this.setState(p);
-                    return;
+                   return p;
                 }
                 Puzzle[] puzzles = p.childrenPuzzles();
                 for (int i = 0; i < puzzles.length; i++) {
-                    if (!pastPuzzle.contains(puzzles[i])) {
+                    if (!pastPuzzles.contains(puzzles[i])) {
                         q.add(puzzles[i]);
-                        pastPuzzle.add(puzzles[i]);
+                        pastPuzzles.add(puzzles[i]);
                     }
                 }
             }
 
-            try {
-                throw new Exception();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            System.out.println("Given an invalid starting state");
+            return this;
         }
 
         
-        Comparator<Puzzle> comparatorh1 = new Comparator<Puzzle>(){
+        private static final Comparator<Puzzle> comparatorh1 = new Comparator<Puzzle>(){
             @Override
             public int compare(Puzzle p1, Puzzle p2) {
                 return p1.g+p1.h1() <= p2.g+p2.h1() ? -1:1;
             }
         };
-        Comparator<Puzzle> comparatorh2 = new Comparator<Puzzle>(){
-
+        
+        private static final Comparator<Puzzle> comparatorh2 = new Comparator<Puzzle>(){
             @Override
             public int compare(Puzzle p1, Puzzle p2) {
                 return p1.g+p1.h2() <= p2.g+p2.h2() ? -1:1;
@@ -326,7 +339,7 @@
             return manhattan;
         }
 
-        public void aStar(String heuristic) {
+        public Puzzle aStar(String heuristic) {
             Comparator<Puzzle> comparator;
             switch(heuristic){
                 case "h1":{
@@ -343,6 +356,7 @@
                     break;
                 }
             }
+            HashSet<Puzzle> pastPuzzles = new HashSet<Puzzle>(stateSpaceSize());
             PriorityQueue<Puzzle> q = new PriorityQueue<Puzzle>(comparator);
             q.add(this);
             while(q.size()>0){
@@ -350,31 +364,27 @@
                 Puzzle p = q.poll();
                 
                 if (p.solved()) {
-                    this.setState(p);
-                    return;
+                    return p;
                 }
                 Puzzle[] puzzles = p.childrenPuzzles();
            
                 for (int i = 0; i < puzzles.length; i++) {
-                    if (!pastPuzzle.contains(puzzles[i])) {
+                    if (!pastPuzzles.contains(puzzles[i])) {
                         q.add(puzzles[i]);
-                        pastPuzzle.add(puzzles[i]);
+                        pastPuzzles.add(puzzles[i]);
                     }
                 }
             }
 
-            try {
-                throw new Exception();
-            } catch (Exception e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+            System.out.println("Given an invalid starting state");
+            return this;
         }
 
-        public void beam(String string) {
+        public Puzzle beam(String string) {
             // Normally start with k states
             int k = Integer.parseInt(string);
 
+            HashSet<Puzzle> pastPuzzles = new HashSet<Puzzle>(stateSpaceSize());
             PriorityQueue<Puzzle> q = new PriorityQueue<Puzzle>(comparatorh2);
             q.add(this);
             while(q.size()>0){
@@ -387,93 +397,93 @@
 
                     System.out.println(i);
                     if(nextPuzzle[i].solved()){
-                        this.setState(nextPuzzle[i]);
-                        return;
+                        return nextPuzzle[i];
                     }
                 }
 
-                for(int j =0;j< k&& (j<queueSize);j++){
+                for(int j =0;j< k && (j<queueSize);j++){
                     Puzzle[] puzzles = nextPuzzle[j].childrenPuzzles();
                     for (int i = 0; i < puzzles.length; i++) {
                     
-                        if (!pastPuzzle.contains(puzzles[i])) {
+                        if (!pastPuzzles.contains(puzzles[i])) {
                             q.add(puzzles[i]);
-                            pastPuzzle.add(puzzles[i]);
+                            pastPuzzles.add(puzzles[i]);
                         }
                     }
                 }
-            
-                
-        }
-    }
+            }
+            System.out.println("Given an invalid starting state");
+            return this;
+        }      
+        
+    
 
     //Sets the maximum amount of nodes an algorithm can search
-    public void maxNodes(String string) {
+    public static void maxNodes(String string) {
         maxNode = Integer.parseInt(string);
     }
 
-        @Override
-        public int hashCode(){
-            if (data == null) {
-                return 0;
-            }
-            int result = 1;
-            int h = data.length;
-            int w = data[0].length;
-            int value = 0;
-            for (int i = 0; i < h; i++) {
-                for (int j = 0; j < w; j++) {
-                    value = data[i][j];
-                    int elementHash = (value ^ (value >>> 32));
-                    result = 31 * result + elementHash;
-                }
-            }
-            return result;
+    @Override
+    public int hashCode(){
+        if (data == null) {
+            return 0;
         }
-
-        @Override
-        public boolean equals(Object o) {
-            if(o == this){
-                return true;
+        int result = 1;
+        int h = data.length;
+        int w = data[0].length;
+        int value = 0;
+        for (int i = 0; i < h; i++) {
+            for (int j = 0; j < w; j++) {
+                value = data[i][j];
+                int elementHash = (value ^ (value >>> 32));
+                result = 31 * result + elementHash;
             }
-            if(o == null || o.getClass() != this.getClass()){
-                return false;
-            }
-
-            Puzzle p = (Puzzle) o;
-            if(length!=p.length){
-                return false;
-            }
-            if(width!=p.width){
-                return false;
-            }
-
-            for (int i = 0; i < length; i++) {
-                for (int j = 0; j < width; j++) {
-                    if (this.data[i][j] != p.data[i][j]) {
-                        return false;
-                    }
-                }
-            }
-            return true ;
         }
+        return result;
+    }
 
-        // could be special case of equals
-        public boolean solved() {
-            for (int i = 0; i < length; i++) {
-                for (int j = 0; j < width; j++) {
-                    if (data[i][j] != i * length + j) {
-                        return false;
-                    }
-                }
-            }
+    @Override
+    public boolean equals(Object o) {
+        if(o == this){
             return true;
         }
-
-        // Given a 
-
-        public boolean optimal(Puzzle bfs) {
-            return  bfs.g == this.g;
+        if(o == null || o.getClass() != this.getClass()){
+            return false;
         }
 
+        Puzzle p = (Puzzle) o;
+        if(length!=p.length){
+            return false;
+        }
+        if(width!=p.width){
+            return false;
+        }
+
+        for (int i = 0; i < length; i++) {
+            for (int j = 0; j < width; j++) {
+                if (this.data[i][j] != p.data[i][j]) {
+                    return false;
+                }
+            }
+        }
+        return true ;
     }
+
+    // could be special case of equals
+    public boolean solved() {
+        for (int i = 0; i < length; i++) {
+            for (int j = 0; j < width; j++) {
+                if (data[i][j] != i * length + j) {
+                     return false;
+                    }
+                }
+            }
+        return true;
+    }
+
+    // Given a bfs puzzle checks if a puzzle is solved optimally
+    public boolean optimal(Puzzle bfs) {
+        return  bfs.g == this.g;
+    }
+
+}

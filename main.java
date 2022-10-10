@@ -34,18 +34,18 @@ public class main {
         //bfs testing
         boolean bfsTest = true;
         for(int i =0;i<1;i++){
-            Puzzle random = new Puzzle(startingState);
+            Puzzle random = Puzzle.createFromString(startingState);
 
             //p.printState();
             // System.out.println(p.solved());
 
             random.randomizeState(100);
-            random = new Puzzle(startingState15);
+            random = Puzzle.createFromString(startingState15);
 
-            Puzzle bfs = new Puzzle(random);
-            Puzzle astarh1 = new Puzzle(random);
-            Puzzle astarh2 = new Puzzle(random);
-            Puzzle beam = new Puzzle(random);
+            Puzzle bfs = Puzzle.copy(random);
+            Puzzle astarh1 = Puzzle.copy(random);
+            Puzzle astarh2 = Puzzle.copy(random);
+            Puzzle beam = Puzzle.copy(random);
 
             System.out.println("Starting Solve\n\n\n");
 
@@ -57,7 +57,7 @@ public class main {
             bfs.printStateVerbose();
             //System.out.println(p.g);
             if(!bfs.solved()){
-                throw new Exception();
+                throw new Exception("Did not solve BFS");
             }
             System.out.println("Bfs done");
 
@@ -81,7 +81,7 @@ public class main {
             astarh1.printStateVerbose();
             
             if(!astarh1.solved() || !astarh1.optimal(bfs)){
-                throw new Exception();
+                throw new Exception("Did not solve A*1");
             }
 
             System.out.println("A* h2");
@@ -102,7 +102,7 @@ public class main {
             astarh2.printStateVerbose();
             
             if(!astarh2.solved() || !astarh2.optimal(bfs)){
-                throw new Exception();
+                throw new Exception("Did not solve A*2");
             }
             System.out.println("A* h2");
             //A*
@@ -122,7 +122,7 @@ public class main {
             beam.printStateVerbose();
             
             if(!beam.solved()){
-                throw new Exception();
+                throw new Exception("Did not solve beam");
             }
 
 
@@ -171,7 +171,7 @@ public class main {
                     state += commandInput[i];
                 }
                 
-                puzzle = new Puzzle(state);
+                Puzzle.createFromString(state);
                 return;
             }
             case "printState":{
@@ -209,7 +209,7 @@ public class main {
                 }
             }
             case "maxNodes":{
-                puzzle.maxNodes(commandInput[1]);
+                Puzzle.maxNodes(commandInput[1]);
                 return;
             }
             default:{
