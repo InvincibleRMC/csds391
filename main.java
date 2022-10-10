@@ -1,21 +1,29 @@
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.Writer;
-
 
 public class main {
 
     static Puzzle puzzle;
     public static void main(String[] args) throws FileNotFoundException {
 
+        Puzzle nxm = Puzzle.createFromDimension(5);
+        
+        //nxm.printState();
+        
+        nxm.randomizeState("100");
+        nxm.printStateVerbose();
+        long startNXM = System.nanoTime();
+        nxm = nxm.customAStar("customh2");
+        long diffNXM = System.nanoTime()-startNXM;
+        //nxm.aStar("h2");
+        nxm.printStateVerbose();
+        System.out.println(diffNXM);
         try {
-            System.out.println(test());
+         //  System.out.println(test());
         } catch (Exception e) {
         
             e.printStackTrace();
@@ -29,19 +37,16 @@ public class main {
     
     public static boolean test() throws Exception{
         String startingState ="012 345 678";
-        String startingState15="154 028 736"; 
+        //String startingState15="154 028 736"; 
         //startingState=startingState15;
         //bfs testing
-        boolean bfsTest = true;
+        boolean test = true;
         for(int i =0;i<1;i++){
             Puzzle random = Puzzle.createFromString(startingState);
 
-            //p.printState();
-            // System.out.println(p.solved());
-
+            
             random.randomizeState(100);
-            random = Puzzle.createFromString(startingState15);
-
+            Puzzle.maxNodes("10");
             System.out.println("Starting Solve\n\n\n");
 
             long startBFS = System.nanoTime();
@@ -58,11 +63,6 @@ public class main {
 
             System.out.println("A* h1");
             //A*
-            
-           // System.out.print(astarh1.pastPuzzle.toString());
-            //astarh1.printState();
-            // System.out.println(p.solved());
-            //Puzzle random = new Puzzle(p);
 
             System.out.println("Starting Solve\n\n\n ");
 
@@ -108,7 +108,7 @@ public class main {
             System.out.println("Starting Solve\n\n\n ");
 
             long startBeam = System.nanoTime();
-            Puzzle beam = random.beam("5");
+            Puzzle beam = random.beam("10");
             long diffBeam = System.nanoTime()-startBeam;
 
             System.out.print("Starting State");
@@ -128,7 +128,7 @@ public class main {
         }
         
 
-        return bfsTest;
+        return test;
     }
 
 
