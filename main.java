@@ -7,12 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.InputMismatchException;
-import java.util.List;
-import java.util.Queue;
-import java.util.Stack;
+
 
 public class main {
 
@@ -50,10 +45,14 @@ public class main {
 
             Puzzle bfs = new Puzzle(random);
             Puzzle astarh1 = new Puzzle(random);
-
+            Puzzle astarh2 = new Puzzle(random);
+            Puzzle beam = new Puzzle(random);
 
             System.out.println("Starting Solve\n\n\n");
+
+            long startBFS = System.nanoTime();
             bfs.bfs();
+            long diffBFS = System.nanoTime()-startBFS;
 
             random.printState();
             bfs.printStateVerbose();
@@ -72,7 +71,11 @@ public class main {
             //Puzzle random = new Puzzle(p);
 
             System.out.println("Starting Solve\n\n\n ");
+
+            long startAStarh1 =System.nanoTime();
             astarh1.aStar("h1");
+            long diffAStarh1 = System.nanoTime()-startAStarh1;
+            
             System.out.print("Starting State");
             random.printState();
             System.out.println("hopefully solved");
@@ -82,7 +85,54 @@ public class main {
                 throw new Exception();
             }
 
+            System.out.println("A* h2");
+            //A*
+            
+           // System.out.print(astarh1.pastPuzzle.toString());
+            astarh2.printState();
+
+            System.out.println("Starting Solve\n\n\n ");
+
+            long startAStarh2 = System.nanoTime();
+            astarh2.aStar("h2");
+            long diffAStarh2 = System.nanoTime()-startAStarh2;
+
+            System.out.print("Starting State");
+            random.printState();
+            System.out.println("hopefully solved");
+            astarh2.printStateVerbose();
+            
+            if(!astarh2.solved() || !astarh2.optimal(bfs)){
+                throw new Exception();
+            }
+            System.out.println("A* h2");
+            //A*
+            
+           // System.out.print(astarh1.pastPuzzle.toString());
+           beam.printState();
+
+            System.out.println("Starting Solve\n\n\n ");
+
+            long startBeam = System.nanoTime();
+            beam.beam("5");
+            long diffBeam = System.nanoTime()-startBeam;
+
+            System.out.print("Starting State");
+            random.printState();
+            System.out.println("hopefully solved");
+            beam.printStateVerbose();
+            
+            if(!beam.solved()){
+                throw new Exception();
+            }
+
+
+
+
+
+            System.out.println(diffBFS + " " + diffAStarh1 + " " + diffAStarh2 + " " + diffBeam);
         }
+        
 
         return bfsTest;
     }
@@ -117,17 +167,12 @@ public class main {
             case "setState":{
                 System.out.println("Setting state");
 
-                int[][] state = new int[commandInput.length-1][commandInput[1].length()];
-                for(int i =0;i<state.length;i++){
-
-                    String[] stateLine = (commandInput[i+1].replace('b', '0')).split("");
-                    for (int j=0;j<state[0].length;j++){
-                       
-                        state[i][j] =  Integer.parseInt(stateLine[j]);
-                        //System.out.println(state[i][j]);
-                    }
+                String state ="";
+                for(int i=1;i<commandInput.length;i++){
+                    state += commandInput[i];
                 }
-                puzzle.setState(state);
+                
+                puzzle = new Puzzle(state);
                 return;
             }
             case "printState":{
