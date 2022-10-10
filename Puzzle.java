@@ -30,7 +30,7 @@
             this.moveMadeTo = p.moveMadeTo;
         }
 
-        // Copy Constructor of a Puzzle
+        // Creates a Puzzle based off a given string state
         public Puzzle(String stringState) {
 
             String[] commandInput = stringState.split(" ");
