@@ -8,44 +8,23 @@
 
     final class Puzzle {
 
-        private static int maxNode = Integer.MAX_VALUE;
-        private static final String[] moveOptions = new String[] { "up", "left", "right", "down" };
+       
+        private static final String MOVE_UP="up";
+        private static final String MOVE_LEFT="left";
+        private static final String MOVE_RIGHT="right";
+        private static final String MOVE_DOWN="down";
+        private static final String[] moveOptions = new String[] { MOVE_UP, MOVE_LEFT, MOVE_RIGHT, MOVE_DOWN };
+        
+        private static int maxNodes = Integer.MAX_VALUE;
+
         private final int width;
         private final int length;
         private final int[][] data;
-        //private final HashSet<Puzzle> pastPuzzle;
+        // moveMadeTo is a String list of moves from the starting state the solved state.
         private final String moveMadeTo;
         // Path Cost
         private final int g;
         private final int nodeCount;
-
-        private Puzzle(int width,int length, int[][] data, String moveMadeTo, int g,int nodeCount){
-            this.width=width;
-            this.length=length;
-            this.data = data;
-            this.moveMadeTo = moveMadeTo;
-            this.g=g;
-            this.nodeCount=nodeCount;
-        }
-
-        private static int[][] copyData(Puzzle p){
-            int[][] data = new int[p.data.length][];
-            for(int i = 0; i < p.data.length; i++){
-                data[i] = p.data[i].clone();
-            }
-            return data;
-        }
-
-        // Copy Constructor of a Puzzle with 
-        public static Puzzle move(Puzzle p, String direction) {
-            String moveMadeTo = p.moveMadeTo + " " + direction;
-            int pathCost =p.g+1;
-            Puzzle puzzle = new Puzzle(p.width,p.length,copyData(p),moveMadeTo,pathCost,p.nodeCount);
-            puzzle.move(direction);
-            return puzzle;
-        }
-
-    
 
         // Creates a Puzzle based off a given string state
         public static Puzzle createFromString(String stringState) {
@@ -67,13 +46,32 @@
             return new Puzzle(width, length, state, moveMadeTo, g, nodeCount);
         }
 
-        //Calculates the factorial of a number
-        public int factorial(int n) {
-            int num = 1;
-            for (int i = 1; i < n; i++) {
-                num *= i;
+        // Copy Constructor of a Puzzle with 
+        public static Puzzle move(Puzzle p, String direction) {
+            String moveMadeTo = p.moveMadeTo + " " + direction;
+            int pathCost =p.g+1;
+            Puzzle puzzle = new Puzzle(p.width,p.length,copyData(p),moveMadeTo,pathCost,p.nodeCount);
+            puzzle.move(direction);
+            return puzzle;
+        }
+
+        // Copy Data 2d array helper
+        private static int[][] copyData(Puzzle p){
+            int[][] data = new int[p.data.length][];
+            for(int i = 0; i < p.data.length; i++){
+                data[i] = p.data[i].clone();
             }
-            return num;
+            return data;
+        }
+
+        // Private generic constructor
+        private Puzzle(int width,int length, int[][] data, String moveMadeTo, int g,int nodeCount){
+            this.width=width;
+            this.length=length;
+            this.data = data;
+            this.moveMadeTo = moveMadeTo;
+            this.g=g;
+            this.nodeCount=nodeCount;
         }
 
         // TODO:
@@ -88,10 +86,6 @@
         public boolean checkBottom() {
             return false;
         }
-        // solved
-        // b12
-        // 345
-        // 678
 
         //Prints the state as described in project 1
         public void printState() {
@@ -105,43 +99,20 @@
 
         // Returns a string form of the nxn puzzle
         public String toString() {
-            String stringPuzzle = "\n";
+            StringBuffer stringPuzzle = new StringBuffer("\n");
             for (int i = 0; i < length; i++) {
                 for (int j = 0; j < width; j++) {
-                    stringPuzzle = stringPuzzle + data[i][j];
+                    int val = data[i][j];
+                    stringPuzzle.append(val == 0 ? 'b':val);
                 }
-                stringPuzzle = stringPuzzle + "\n";
+                stringPuzzle.append("\n");
             }
-            return stringPuzzle.replace('0', 'b');
+            return stringPuzzle.toString() ;
         }
 
+        // moves a given direction if valid
         public void move(String direction) {
-
-            int x = holeLocationX();
-            int y = holeLocationY();
-            switch (direction) {
-                case "up": {
-                    x--;
-                    break;
-                }
-                case "left": {
-                    y--;
-                    break;
-                }
-                case "right": {
-                    y++;
-                    break;
-                }
-                case "down": {
-                    x++;
-                    break;
-                }
-                default: {
-                    System.out.println("Not a valid move direction");
-                    return;
-                }
-            }
-            int[] swapLocation = new int[] { x, y };
+            int[] swapLocation = calcSwapLocation(direction);
             if (validSwap(swapLocation)) {
                 swap(swapLocation);
             } else {
@@ -203,7 +174,7 @@
         public void randomizeState(int n){
            
             //todo add seeding
-            Random r = new Random();
+            //final Random r = new Random();
             for (int i = 0; i <= n; i++) {
                 //r.randInt()
                 move(moveOptions[ThreadLocalRandom.current().nextInt(0, moveOptions.length)]);
@@ -212,37 +183,42 @@
 
         // Checks if a move is valid
         public boolean validMove(String direction){
+            return validSwap(calcSwapLocation(direction));
+        }
+
+        // Calculate the swap Location
+        private int[] calcSwapLocation(String direction){
             int x = holeLocationX();
             int y = holeLocationY();
             switch (direction) {
-                case "up": {
+                case MOVE_UP: {
                     x--;
                     break;
                 }
-                case "left": {
+                case MOVE_LEFT: {
                     y--;
                     break;
                 }
-                case "right": {
+                case MOVE_RIGHT: {
                     y++;
                     break;
                 }
-                case "down": {
+                case MOVE_DOWN: {
                     x++;
                     break;
                 }
                 default: {
                     System.out.println("Not a valid move direction");
-                    return false;
+                    x=Integer.MIN_VALUE;
+                    y=Integer.MIN_VALUE;
                 }
             }
-            int[] swapLocation = new int[] { x, y };
-            return validSwap(swapLocation);
+            return new int[] { x, y };
         }
 
         public Puzzle[] childrenPuzzles() {
 
-            if(this.maxNode == this.nodeCount && this.maxNode!=-1){
+            if(this.maxNodes == this.nodeCount && this.maxNodes!=-1){
                 System.out.println( "Exceeded maximum node count!");
             }
 
@@ -263,6 +239,15 @@
         // returns the stateSpaceSize of a puzzle
         private int stateSpaceSize(){
             return factorial(width*length)/2;
+        }
+
+        //Calculates the factorial of a number
+        public static int factorial(int n) {
+            int num = 1;
+            for (int i = 1; i < n; i++) {
+                num *= i;
+            }
+            return num;
         }
 
         // Breadth First Search
@@ -416,7 +401,7 @@
 
     //Sets the maximum amount of nodes an algorithm can search
     public static void maxNodes(String string) {
-        maxNode = Integer.parseInt(string);
+        maxNodes = Integer.parseInt(string);
     }
 
     @Override
