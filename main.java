@@ -110,7 +110,7 @@ public class main {
             System.out.println("Starting Solve\n\n\n ");
 
             long startNXM = System.nanoTime();
-            Puzzle nxm = random.customAStar("h2");
+            Puzzle nxm = random.aStarDivideConquer("h2");
             long diffNXM = System.nanoTime()-startNXM;
 
             System.out.print("Starting State");

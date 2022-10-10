@@ -67,11 +67,10 @@ final class Puzzle {
         return createFromDimension(n, n);
     }
 
-    // Creates a starting Puzzle of n by n
+    // Creates a resets a Puzzles dimensions
     public static Puzzle resetDimenstion(Puzzle p) {
         return new Puzzle(p.data[0].length, p.data.length, copyData(p), p.moveMadeTo, p.g);
     }
-
 
     // Puzzle move
     public static Puzzle move(Puzzle p, String direction) {
@@ -92,7 +91,6 @@ final class Puzzle {
         else{
             width--;
         }
-        
         return new Puzzle(width, length, copyData(p), p.moveMadeTo, p.g);
     }
 
@@ -114,29 +112,6 @@ final class Puzzle {
         this.g = g;
     }
 
-    // TODO:
-    public boolean checkRight() {
-        boolean check = true;
-        for (int i = 0; i < length; i++) {
-
-        }
-        return check;
-    }
-
-    public boolean checkBottom() {
-        return false;
-    }
-
-    // Prints the state as described in project 1
-    public void printState() {
-        System.out.println(toString());
-    }
-
-    // Prints the state as described in project 1 with the path and path cost
-    public void printStateVerbose() {
-        System.out.println(toString() + "Path cost= " + g + " Path= " + moveMadeTo);
-    }
-
     // Returns a string form of the nxn puzzle
     public String toString() {
         StringBuffer stringPuzzle = new StringBuffer("\n");
@@ -151,6 +126,16 @@ final class Puzzle {
         return stringPuzzle.toString();
     }
 
+    // Prints the state as described in project 1
+    public void printState() {
+        System.out.println(toString());
+    }
+
+    // Prints the state as described in project 1 with the path and path cost
+    public void printStateVerbose() {
+        System.out.println(toString() + "Path cost= " + g + " Path= " + moveMadeTo);
+    }
+    
     // moves a given direction if valid
     public void move(String direction) {
         int[] swapLocation = calcSwapLocation(direction);
@@ -159,6 +144,40 @@ final class Puzzle {
         } else {
             System.out.println("Cannot move edge in the way.");
         }
+    }
+    // Checks if a move is valid
+    public boolean validMove(String direction) {
+        return validSwap(calcSwapLocation(direction));
+    }
+
+    // Calculate the swap Location
+    private int[] calcSwapLocation(String direction) {
+        int x = holeLocationX();
+        int y = holeLocationY();
+        switch (direction) {
+            case MOVE_UP: {
+                x--;
+                break;
+            }
+            case MOVE_LEFT: {
+                y--;
+                break;
+            }
+            case MOVE_RIGHT: {
+                y++;
+                break;
+            }
+            case MOVE_DOWN: {
+                x++;
+                break;
+            }
+            default: {
+                System.out.println("Not a valid move direction");
+                x = Integer.MIN_VALUE;
+                y = Integer.MIN_VALUE;
+            }
+        }
+        return new int[] { x, y };
     }
 
     // Checks if a swap is valid
@@ -227,64 +246,9 @@ final class Puzzle {
         }
     }
 
-    // Checks if a move is valid
-    public boolean validMove(String direction) {
-        return validSwap(calcSwapLocation(direction));
-    }
-
-    // Calculate the swap Location
-    private int[] calcSwapLocation(String direction) {
-        int x = holeLocationX();
-        int y = holeLocationY();
-        switch (direction) {
-            case MOVE_UP: {
-                x--;
-                break;
-            }
-            case MOVE_LEFT: {
-                y--;
-                break;
-            }
-            case MOVE_RIGHT: {
-                y++;
-                break;
-            }
-            case MOVE_DOWN: {
-                x++;
-                break;
-            }
-            default: {
-                System.out.println("Not a valid move direction");
-                x = Integer.MIN_VALUE;
-                y = Integer.MIN_VALUE;
-            }
-        }
-        return new int[] { x, y };
-    }
-
-    // returns the stateSpaceSize of a puzzle
-    private int stateSpaceSize() {
-       
-        BigInteger maxSize = factorial(width * length).divide(BigInteger.valueOf(2));
-        //System.out.println(maxSize);
-        if (maxSize.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) >=0) {
-            return Integer.MAX_VALUE ;
-        }
-        return maxSize.intValue();
-    }
-
-    // Calculates the factorial of a number
-    public static BigInteger factorial(int n) {
-        BigInteger num = BigInteger.valueOf(1);
-        for (int i = 1; i < n; i++) {
-            num = num.multiply(BigInteger.valueOf(i));
-        }
-        return num;
-    }
-
-    // Breadth First Search
-    public Puzzle bfs() {
-        return aStar("bfs");
+    // Sets the maximum amount of nodes an algorithm can search
+    public static void maxNodes(String string) {
+        maxNodes = Integer.parseInt(string);
     }
 
     // added Node counting into the queue
@@ -302,23 +266,9 @@ final class Puzzle {
             if (nodeCount == maxNodes) {
                 System.out.println("Max Node count has been exceeded");
             }
-
             return super.add(p);
         }
     }
-
-    // returns an Puzzle[] of all valid children Puzzles
-    public Puzzle[] childrenPuzzles() {
-
-        LinkedList<Puzzle> puzzles = new LinkedList<Puzzle>();
-        for (int i = 0; i < moveOptions.length; i++) {
-            if (validMove(moveOptions[i])) {
-                puzzles.add(Puzzle.move(this, moveOptions[i]));
-            }
-        }
-        return puzzles.toArray(new Puzzle[puzzles.size()]);
-    }
-
 
     private static interface Heuristic {
         public int heuristic(Puzzle p);
@@ -419,6 +369,7 @@ final class Puzzle {
             return manhattan;
         }
     }
+
     public static class BFS implements Heuristic {
         // no Heuristic for bfs
         public int heuristic(Puzzle p) {
@@ -469,6 +420,11 @@ final class Puzzle {
         }
     }
 
+    // Breadth First Search
+    public Puzzle bfs() {
+        return aStar("bfs");
+    }
+
     // aStar
     public Puzzle aStar(String heuristic) {
         HeuristicComparator comparator = heuristic(heuristic);
@@ -495,8 +451,8 @@ final class Puzzle {
 
     public Puzzle beam(String string) {
         // Normally start with k states
-        int k = Integer.parseInt(string);
-
+        int startingK = Integer.parseInt(string);
+        int k = startingK;
         HashSet<Puzzle> pastPuzzles = new HashSet<Puzzle>(stateSpaceSize());
         PuzzlePriorityQueue q = new PuzzlePriorityQueue(h2);
         q.add(this);
@@ -504,13 +460,13 @@ final class Puzzle {
         while (!q.isEmpty()) {
 
             // At start you only have 1 state so check all the states if there is less than k
-            if(k < q.size()){
-                k =Integer.parseInt(string);
+            if(startingK < q.size()){
+                k = startingK;
             }
             else{
-                k=q.size();
+                k = q.size();
             }
-
+            System.out.println(k + " " + q.size());
             // Selecting the next k children for a solution
             Puzzle[] nextPuzzle = new Puzzle[k];
             for (int i = 0; i < k; i++) {
@@ -523,7 +479,6 @@ final class Puzzle {
             for (int j = 0; j<k; j++) {
                 Puzzle[] puzzles = nextPuzzle[j].childrenPuzzles();
                 for (int i = 0; i < puzzles.length; i++) {
-
                     if (pastPuzzles.add(puzzles[i])) {
                         q.add(puzzles[i]);
                     }
@@ -534,13 +489,14 @@ final class Puzzle {
         return this;
     }
 
-    // customAStar
+    // aStarDivideConquer
     // A* which divide and Conqueres the stateSpace by solving sides first
-    public Puzzle customAStar(String heuristic) {
+    public Puzzle aStarDivideConquer(String heuristic) {
         HeuristicComparator comparator = heuristic(heuristic);
         HashSet<Puzzle> pastPuzzles = new HashSet<Puzzle>(stateSpaceSize());
         PuzzlePriorityQueue q = new PuzzlePriorityQueue(comparator);
         q.add(this);
+        pastPuzzles.add(this);
         while (!q.isEmpty()) {
             Puzzle p = q.poll();
             if (p.solved()) {
@@ -549,17 +505,12 @@ final class Puzzle {
 
             if ((p.width + p.length > 5)){
             
-                // If bottom solved shrink the problem
-                if(p.length >= p.width && p.bottomSolved()){
+                // If bottom solved shrink the problem or if bottom has been solved and the right has been solved
+                if((p.length >= p.width && p.bottomSolved()) || (p.width>p.length && p.rightSolved())) {
                     System.out.println("Shrinking Puzzle");
                     Puzzle small = Puzzle.DivieAndConquer(p);
-                    return small.customAStar(heuristic);
-                }
-                // After bottom solve side
-                if(p.width>p.length && p.rightSolved()){
-                    System.out.println("Shrinking Puzzle");
-                    Puzzle small = Puzzle.DivieAndConquer(p);
-                    return small.customAStar(heuristic);
+                    pastPuzzles=null;
+                    return small.aStarDivideConquer(heuristic);
                 }
              }
 
@@ -575,9 +526,36 @@ final class Puzzle {
         return this;
     }
 
-    // Sets the maximum amount of nodes an algorithm can search
-    public static void maxNodes(String string) {
-        maxNodes = Integer.parseInt(string);
+    // returns an Puzzle[] of all valid children Puzzles
+    public Puzzle[] childrenPuzzles() {
+
+        LinkedList<Puzzle> puzzles = new LinkedList<Puzzle>();
+        for (int i = 0; i < moveOptions.length; i++) {
+            if (validMove(moveOptions[i])) {
+                puzzles.add(Puzzle.move(this, moveOptions[i]));
+            }
+        }
+        return puzzles.toArray(new Puzzle[puzzles.size()]);
+    }
+
+    // returns the stateSpaceSize of a puzzle
+    private int stateSpaceSize() {
+       
+        BigInteger maxSize = factorial(width * length).divide(BigInteger.valueOf(2));
+        //System.out.println(maxSize);
+        if (maxSize.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) >=0) {
+            return Integer.MAX_VALUE ;
+        }
+        return maxSize.intValue();
+    }
+
+    // Calculates the factorial of a number
+    private static BigInteger factorial(int n) {
+        BigInteger num = BigInteger.valueOf(1);
+        for (int i = 1; i < n; i++) {
+            num = num.multiply(BigInteger.valueOf(i));
+        }
+        return num;
     }
 
     // Generates a hashcode for the Puzzle based on the data
