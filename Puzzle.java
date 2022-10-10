@@ -348,23 +348,23 @@
         private static final HeuristicComparator h1 = new HeuristicComparator(new H1());
         private static final HeuristicComparator h2 = new HeuristicComparator(new H2());
 
-        public Puzzle aStar(String heuristic) {
-            HeuristicComparator comparator;
+        private HeuristicComparator heuristic(String heuristic){
             switch(heuristic){
                 case "h1":{
-                    comparator = h1;
-                    break;
+                    return h1;
                 }
                 case "h2":{
-                    comparator = h2;
-                    break;
+                    return h2;
                 }
                 default:{
                     System.out.println("No heuristic given defaulting to h1");
-                    comparator = h1;
-                    break;
+                    return h1;
                 }
             }
+        }
+
+        public Puzzle aStar(String heuristic) {
+            HeuristicComparator comparator = heuristic(heuristic);
             HashSet<Puzzle> pastPuzzles = new HashSet<Puzzle>(stateSpaceSize());
             PuzzlePriorityQueue q = new PuzzlePriorityQueue(comparator);
             q.add(this);
@@ -489,5 +489,4 @@
     public boolean optimal(Puzzle bfs) {
         return  bfs.g == this.g;
     }
-
 }
