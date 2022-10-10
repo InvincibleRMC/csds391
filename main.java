@@ -10,18 +10,7 @@ public class main {
     static Puzzle puzzle;
     public static void main(String[] args) {
 
-        Puzzle nxm = Puzzle.createFromDimension(4);
         
-        //nxm.printState();
-        
-        nxm.randomizeState("1000");
-        nxm.printStateVerbose();
-        long startNXM = System.nanoTime();
-        //nxm = nxm.customAStar("customh2");
-        long diffNXM = System.nanoTime()-startNXM;
-        //nxm.aStar("h2");
-        nxm.printStateVerbose();
-        System.out.println(diffNXM);
         try {
            System.out.println(test());
         } catch (Exception e) {

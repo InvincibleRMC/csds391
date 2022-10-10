@@ -7,6 +7,7 @@ import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
+import javax.swing.JApplet;
 import javax.swing.text.DefaultStyledDocument.ElementSpec;
 
 final class Puzzle {
@@ -287,45 +288,10 @@ final class Puzzle {
 
     // Breadth First Search
     public Puzzle bfs() {
-        HashSet<Puzzle> pastPuzzles = new HashSet<Puzzle>(stateSpaceSize());
-        PuzzleQueue q = new PuzzleQueue();
-        q.add(this);
-        while (!q.isEmpty()) {
-            Puzzle p = q.poll();
-            if (p.solved()) {
-                return p;
-            }
-            Puzzle[] puzzles = p.childrenPuzzles();
-
-            for (int i = 0; i < puzzles.length; i++) {
-                if (!pastPuzzles.contains(puzzles[i])) {
-                    q.add(puzzles[i]);
-                    pastPuzzles.add(puzzles[i]);
-                }
-            }
-        }
-
-        System.out.println("Given an invalid starting state");
-        return this;
+        return aStar("bfs");
     }
 
-    public class PuzzleQueue extends LinkedList<Puzzle> {
-        private int nodeCount = 0;
-
-        PuzzleQueue() {
-            nodeCount = 0;
-        }
-
-        @Override
-        public boolean add(Puzzle p) {
-            nodeCount++;
-            if (nodeCount == maxNodes) {
-                System.out.println("Max Node count has been exceeded");
-            }
-            return super.add(p);
-        }
-    }
-
+    // added Node counting into the queue
     public class PuzzlePriorityQueue extends PriorityQueue<Puzzle> {
         private int nodeCount = 0;
 
@@ -345,6 +311,7 @@ final class Puzzle {
         }
     }
 
+    // returns an Puzzle[] of all valid children Puzzles
     public Puzzle[] childrenPuzzles() {
 
         LinkedList<Puzzle> puzzles = new LinkedList<Puzzle>();
@@ -355,6 +322,7 @@ final class Puzzle {
         }
         return puzzles.toArray(new Puzzle[puzzles.size()]);
     }
+
 
     private static interface Heuristic {
         public int heuristic(Puzzle p);
@@ -397,65 +365,35 @@ final class Puzzle {
     }
     
     public static class CustomH1 implements Heuristic {
-        // h1 is the max of the bottom and right misplaced tiles
+        // CustomH1 is the number of misplaced edge tiles
         public int heuristic(Puzzle p) {
 
-            
-
-            int misplaceTilesRight = 0;
-            int misplaceTilesBottom = 0;
-
-            int i = p.length-1;
-            for (int j = 0; j < p.width; j++) {
-                if(p.data[i][j] == 0) continue;
-                if (p.data[i][j] != i * p.width + j) {
-                    misplaceTilesBottom++;           
+            int misplaceTiles = 0;
+            boolean solvingBottom = p.length >= p.width;
+            if(solvingBottom){
+                int i = p.length-1;
+                for (int j = 0; j < p.width; j++) {
+                    if(p.data[i][j] == 0) continue;
+                    if (p.data[i][j] != i * p.width + j) {
+                        misplaceTiles++;           
+                    }
                 }
             }
-
-            for (i = 0; i < p.length; i++) {
-                int j =p.width-1;
-                if (p.data[i][j] != i * p.width + j) {
-                    misplaceTilesRight++;
+            else{
+                for (int i = 0; i < p.length; i++) {
+                    int j =p.width-1;
+                    if (p.data[i][j] != i * p.width + j) {
+                        misplaceTiles++;
+                    }
                 }
             }
             
-            return Math.min(misplaceTilesBottom,misplaceTilesRight);
+            return misplaceTiles;
         }
     }
-    /* 
+   
     public static class CustomH2 implements Heuristic {
-        // h2 is the max manhattan distance of the right and bottom tiles to their goal locations
-        public int heuristic(Puzzle p) {
-            int manhattanBottom = 0;
-            int manhattanRight = 0;
-            
-            int i =p.length-1;
-            for (int j = 0; j < p.width; j++) {
-                if (p.data[i][j] == 0) continue;
-                int val = p.data[i][j];
-                int y = val % p.data[i].length;
-                int x = (val - y) / p.data.length;
-                manhattanBottom += Math.abs(i - x) + Math.abs(j - y);         
-            }
-
-           
-            for (i = 0; i < p.length; i++) {
-                int j = p.width-1;
-                if (p.data[i][j] == 0) continue;
-                int val = p.data[i][j];
-                int y = val % p.data[i].length;
-                int x = (val - y) / p.data.length;
-                manhattanBottom += Math.abs(i - x) + Math.abs(j - y);         
-            }
-            
-            return Math.min(manhattanBottom,manhattanRight);
-        }
-    }
-    */
-
-    public static class CustomH2 implements Heuristic {
-        // h2 is the manhattan distance of the side tiles to the side being solved
+        // CustomH2 is the manhattan distance of the side tiles to the side being solved
         public int heuristic(Puzzle p) {
 
             boolean solvingBottom = p.length >= p.width;
@@ -485,6 +423,12 @@ final class Puzzle {
             return manhattan;
         }
     }
+    public static class BFS implements Heuristic {
+        // no Heuristic for bfs
+        public int heuristic(Puzzle p) {
+            return 0;
+        }
+    }
 
     public static class HeuristicComparator implements Comparator<Puzzle> {
         private final Heuristic heuristic;
@@ -503,6 +447,7 @@ final class Puzzle {
     private static final HeuristicComparator h2 = new HeuristicComparator(new H2());
     private static final HeuristicComparator customH1 = new HeuristicComparator(new CustomH1());
     private static final HeuristicComparator customH2 = new HeuristicComparator(new CustomH2());
+    private static final HeuristicComparator bfs = new HeuristicComparator(new BFS());
     // Parses the string into a HeuristicComparator
     private HeuristicComparator heuristic(String heuristic) {
         switch (heuristic) {
@@ -518,6 +463,9 @@ final class Puzzle {
             case "customh2":{
                 return customH2;
             }
+            case "bfs":{
+                return bfs;
+            }
             default: {
                 System.out.println("No heuristic given defaulting to h1");
                 return h1;
@@ -531,6 +479,7 @@ final class Puzzle {
         HashSet<Puzzle> pastPuzzles = new HashSet<Puzzle>(stateSpaceSize());
         PuzzlePriorityQueue q = new PuzzlePriorityQueue(comparator);
         q.add(this);
+        pastPuzzles.add(this);
         while (!q.isEmpty()) {
             Puzzle p = q.poll();
             if (p.solved()) {
@@ -538,9 +487,8 @@ final class Puzzle {
             }
             Puzzle[] puzzles = p.childrenPuzzles();
             for (int i = 0; i < puzzles.length; i++) {
-                if (!pastPuzzles.contains(puzzles[i])) {
+                if (pastPuzzles.add(puzzles[i])) {
                     q.add(puzzles[i]);
-                    pastPuzzles.add(puzzles[i]);
                 }
             }
         }
@@ -556,6 +504,7 @@ final class Puzzle {
         HashSet<Puzzle> pastPuzzles = new HashSet<Puzzle>(stateSpaceSize());
         PuzzlePriorityQueue q = new PuzzlePriorityQueue(h2);
         q.add(this);
+        pastPuzzles.add(this);
         while (!q.isEmpty()) {
 
             int queueSize = q.size();
@@ -573,9 +522,8 @@ final class Puzzle {
                 Puzzle[] puzzles = nextPuzzle[j].childrenPuzzles();
                 for (int i = 0; i < puzzles.length; i++) {
 
-                    if (!pastPuzzles.contains(puzzles[i])) {
+                    if (pastPuzzles.add(puzzles[i])) {
                         q.add(puzzles[i]);
-                        pastPuzzles.add(puzzles[i]);
                     }
                 }
             }
@@ -614,9 +562,8 @@ final class Puzzle {
 
             Puzzle[] puzzles = p.childrenPuzzles();
             for (int i = 0; i < puzzles.length; i++) {
-                if (!pastPuzzles.contains(puzzles[i])) {
+                if (pastPuzzles.add(puzzles[i])) {
                     q.add(puzzles[i]);
-                    pastPuzzles.add(puzzles[i]);
                 }
             }
         }
