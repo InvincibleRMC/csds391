@@ -11,7 +11,7 @@
         private int width;
         private int length;
         private int[][] data;
-        public HashSet<Puzzle> pastPuzzle;
+        private HashSet<Puzzle> pastPuzzle;
         private String moveMadeTo ="";
         private int g = 0;
         private int maxNode = Integer.MAX_VALUE;
@@ -150,6 +150,7 @@
             }
         }
 
+        // Checks if a swap is valid
         public boolean validSwap(int[] swapLocation) {
             int x = swapLocation[0];
             int y = swapLocation[1];
@@ -162,21 +163,21 @@
             return true;
         }
 
+        // Performs a swap
         public void swap(int[] swapLocation) {
-            // System.out.println("swapping");
             int temp = data[holeLocationX()][holeLocationY()];
             data[holeLocationX()][holeLocationY()] = data[swapLocation[0]][swapLocation[1]];
             data[swapLocation[0]][swapLocation[1]] = temp;
         }
 
+        // X cordinator of the blank Tile
         public int holeLocationX() {
             return holeLocation()[0];
         }
-
+        // Y cordinator of the blank Tile
         public int holeLocationY() {
             return holeLocation()[1];
         }
-
 
         //Finds the blank tile
         public int[] holeLocation() {
@@ -189,14 +190,17 @@
             }
            
             // Error if hole is not found
+            // Returns an Int to not throw error like if return null
             System.out.println("COULDN'T find hole");
-            return new int[] { -10, -10 };
+            return new int[] { Integer.MIN_VALUE, Integer.MIN_VALUE };
         }
 
+        // Randomizes a state from txt
         public void randomizeState(String times) {
             randomizeState(Integer.parseInt(times));
         }
 
+        // Randomizes a state n times
         public void randomizeState(int n){
             String[] moveOptions = new String[] { "up", "left", "right", "down" };
             //todo add seeding
@@ -207,6 +211,7 @@
             }
         }
 
+        // Checks if a move is valid
         public boolean validMove(String direction){
             int x = holeLocationX();
             int y = holeLocationY();
@@ -229,12 +234,7 @@
                 }
                 default: {
                     System.out.println("Not a valid move direction");
-                    try {
-                        throw new Exception();
-                    } catch (Exception e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
+                    return false;
                 }
             }
             int[] swapLocation = new int[] { x, y };
@@ -307,6 +307,7 @@
             }
         };        
 
+        // h1 is the number of misplaced tiles
         public int h1(){
             int misplaceTiles = 0;
             for (int i = 0; i < length; i++) {
@@ -320,6 +321,7 @@
             return misplaceTiles;
         }
 
+        // h2 is the manhattan distance of the tiles to their goal locations
         public int h2(){
             int manhattan = 0;
             for (int i = 0; i < length; i++) {
@@ -478,8 +480,9 @@
             return true;
         }
 
+        // Given a 
+
         public boolean optimal(Puzzle bfs) {
-        // random.bfs();
             return  bfs.g == this.g;
         }
 

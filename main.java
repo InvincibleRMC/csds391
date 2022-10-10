@@ -37,7 +37,6 @@ public class main {
             Puzzle random = new Puzzle(startingState);
 
             //p.printState();
-            System.out.print(random.pastPuzzle.toString());
             // System.out.println(p.solved());
 
             random.randomizeState(100);
