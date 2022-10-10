@@ -404,12 +404,11 @@ final class Puzzle {
             boolean solvingBottom = p.length >= p.width;
             int misplaceTiles = 0;
            
-
             if(solvingBottom){
                 int i = p.length-1;
                 for (int j = 0; j < p.width; j++) {
                     if(p.data[i][j] == 0) continue;
-                    if (p.data[i][j] != i * p.length + j) {
+                    if (p.data[i][j] != i * p.width + j) {
                         misplaceTiles++;           
                     }
                 }
@@ -440,8 +439,8 @@ final class Puzzle {
                 for (int j = 0; j < p.width; j++) {
                     if (p.data[i][j] == 0) continue;
                     int val = p.data[i][j];
-                    int y = val % p.data[i].length;
-                    int x = (val - y) / p.data.length;
+                    int y = val % p.width;
+                    int x = (val - y) / p.length;
                     manhattan += Math.abs(i - x) + Math.abs(j - y);         
                 }
             }
@@ -450,8 +449,8 @@ final class Puzzle {
                     int j = p.width-1;
                     if (p.data[i][j] == 0) continue;
                     int val = p.data[i][j];
-                    int y = val % p.data[i].length;
-                    int x = (val - y) / p.data.length;
+                    int y = val % p.width;
+                    int x = (val - y) / p.length;
                     manhattan += Math.abs(i - x) + Math.abs(j - y);         
                 }
             }

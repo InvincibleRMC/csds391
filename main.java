@@ -8,13 +8,13 @@ import java.io.InputStreamReader;
 public class main {
 
     static Puzzle puzzle;
-    public static void main(String[] args) throws FileNotFoundException {
+    public static void main(String[] args) {
 
-        Puzzle nxm = Puzzle.createFromDimension(5);
+        Puzzle nxm = Puzzle.createFromDimension(4);
         
         //nxm.printState();
         
-        nxm.randomizeState("100");
+        nxm.randomizeState("1000");
         nxm.printStateVerbose();
         long startNXM = System.nanoTime();
         nxm = nxm.customAStar("customh2");
@@ -100,11 +100,8 @@ public class main {
                 throw new Exception("Did not solve A*2");
             }
             System.out.println("A* h2");
-            //A*
             
-           // System.out.print(astarh1.pastPuzzle.toString());
-           //beam.printState();
-
+            // beam
             System.out.println("Starting Solve\n\n\n ");
 
             long startBeam = System.nanoTime();
@@ -120,11 +117,23 @@ public class main {
                 throw new Exception("Did not solve beam");
             }
 
+            // beam
+            System.out.println("Starting Solve\n\n\n ");
 
+            long startNXM = System.nanoTime();
+            Puzzle nxm = random.customAStar("customh2");
+            long diffNXM = System.nanoTime()-startNXM;
 
+            System.out.print("Starting State");
+            random.printState();
+            System.out.println("hopefully solved");
+            nxm.printStateVerbose();
+            
+            if(!nxm.solved()){
+                throw new Exception("Did not solve beam");
+            }
 
-
-            System.out.println(diffBFS + " " + diffAStarh1 + " " + diffAStarh2 + " " + diffBeam);
+            System.out.println(diffBFS + " " + diffAStarh1 + " " + diffAStarh2 + " " + diffBeam + " " + diffNXM);
         }
         
 
