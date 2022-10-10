@@ -11,7 +11,7 @@ import java.io.Writer;
 
 public class main {
 
-    static Puzzle puzzle = new Puzzle();
+    static Puzzle puzzle;
     public static void main(String[] args) throws FileNotFoundException {
 
         try {

@@ -6,10 +6,10 @@
     import java.util.Random;
     import java.util.concurrent.ThreadLocalRandom;
 
-    public class Puzzle {
+    final class Puzzle {
 
-        private int width;
-        private int length;
+        private final int width;
+        private final int length;
         private int[][] data;
         private HashSet<Puzzle> pastPuzzle;
         private String moveMadeTo ="";
@@ -17,9 +17,7 @@
         private int maxNode = Integer.MAX_VALUE;
         private int nodeCount = 0;
 
-        public Puzzle() {
-        }
-
+        // Copy Constructor of a Puzzle
         public Puzzle(Puzzle p) {
             this.width = p.width;
             this.length = p.length;
@@ -27,12 +25,12 @@
             for(int i = 0; i < p.data.length; i++){
                 data[i] = p.data[i].clone();
             }
-            
             this.pastPuzzle = p.pastPuzzle;
             this.g = p.g;
             this.moveMadeTo = p.moveMadeTo;
         }
 
+        // Copy Constructor of a Puzzle
         public Puzzle(String stringState) {
 
             String[] commandInput = stringState.split(" ");
@@ -53,8 +51,6 @@
 
         public void setState(Puzzle p) {
             int[][] state = p.data;
-            length = state.length;
-            width = state[0].length;
             data = state;
             pastPuzzle.clear();
             g=p.g;
