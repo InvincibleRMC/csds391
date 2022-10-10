@@ -17,20 +17,6 @@
         private int maxNode = Integer.MAX_VALUE;
         private int nodeCount = 0;
 
-        public Puzzle(int width, int length) {
-            this.width = width;
-            this.length = length;
-            data = new int[width][length];
-            pastPuzzle = new HashSet<Puzzle>(factorial(width * length) / 2);
-        }
-
-        public Puzzle(int n) {
-            width = n;
-            length = n;
-            data = new int[n][n];
-            pastPuzzle = new HashSet<Puzzle>(factorial(width * length) / 2);
-        }
-
         public Puzzle() {
         }
 
@@ -82,6 +68,7 @@
             moveMadeTo = p.moveMadeTo;
         }
 
+        //Calculates the factorial of a number
         public int factorial(int n) {
             int num = 1;
             for (int i = 1; i < n; i++) {
@@ -372,14 +359,12 @@
                 Puzzle p = q.poll();
                 
                 if (p.solved()) {
-                  
                     this.setState(p);
                     return;
                 }
                 Puzzle[] puzzles = p.childrenPuzzles();
            
                 for (int i = 0; i < puzzles.length; i++) {
-                   
                     if (!pastPuzzle.contains(puzzles[i])) {
                         q.add(puzzles[i]);
                         pastPuzzle.add(puzzles[i]);
