@@ -17,13 +17,13 @@ public class main {
         nxm.randomizeState("1000");
         nxm.printStateVerbose();
         long startNXM = System.nanoTime();
-        nxm = nxm.customAStar("customh2");
+        //nxm = nxm.customAStar("customh2");
         long diffNXM = System.nanoTime()-startNXM;
         //nxm.aStar("h2");
         nxm.printStateVerbose();
         System.out.println(diffNXM);
         try {
-         //  System.out.println(test());
+           System.out.println(test());
         } catch (Exception e) {
         
             e.printStackTrace();
@@ -121,7 +121,7 @@ public class main {
             System.out.println("Starting Solve\n\n\n ");
 
             long startNXM = System.nanoTime();
-            Puzzle nxm = random.customAStar("customh2");
+            Puzzle nxm = random.customAStar("h2");
             long diffNXM = System.nanoTime()-startNXM;
 
             System.out.print("Starting State");
@@ -130,7 +130,7 @@ public class main {
             nxm.printStateVerbose();
             
             if(!nxm.solved()){
-                throw new Exception("Did not solve beam");
+                throw new Exception("Did not solve customAStar");
             }
 
             System.out.println(diffBFS + " " + diffAStarh1 + " " + diffAStarh2 + " " + diffBeam + " " + diffNXM);

@@ -237,7 +237,6 @@ final class Puzzle {
 
     // Calculate the swap Location
     private int[] calcSwapLocation(String direction) {
-       // printState();
         int x = holeLocationX();
         int y = holeLocationY();
         switch (direction) {
@@ -388,8 +387,8 @@ final class Puzzle {
                         continue;
                     int val = p.data[i][j];
 
-                    int y = val % p.data[i].length;
-                    int x = (val - y) / p.data.length;
+                    int y = val % p.width;
+                    int x = (val - y) / p.length;
                     manhattan += Math.abs(i - x) + Math.abs(j - y);
                 }
             }
@@ -398,44 +397,72 @@ final class Puzzle {
     }
     
     public static class CustomH1 implements Heuristic {
-        // h1 is the finds the misplaced tiles of the solving side
+        // h1 is the max of the bottom and right misplaced tiles
         public int heuristic(Puzzle p) {
 
-            boolean solvingBottom = p.length >= p.width;
-            int misplaceTiles = 0;
-           
-            if(solvingBottom){
-                int i = p.length-1;
-                for (int j = 0; j < p.width; j++) {
-                    if(p.data[i][j] == 0) continue;
-                    if (p.data[i][j] != i * p.width + j) {
-                        misplaceTiles++;           
-                    }
+            
+
+            int misplaceTilesRight = 0;
+            int misplaceTilesBottom = 0;
+
+            int i = p.length-1;
+            for (int j = 0; j < p.width; j++) {
+                if(p.data[i][j] == 0) continue;
+                if (p.data[i][j] != i * p.width + j) {
+                    misplaceTilesBottom++;           
                 }
             }
-            else{
 
-                for (int i = 0; i < p.length; i++) {
-                    int j =p.width-1;
-                    if (p.data[i][j] != i * p.width + j) {
-                        misplaceTiles++;
-                    }
+            for (i = 0; i < p.length; i++) {
+                int j =p.width-1;
+                if (p.data[i][j] != i * p.width + j) {
+                    misplaceTilesRight++;
                 }
             }
             
-            return misplaceTiles;
+            return Math.min(misplaceTilesBottom,misplaceTilesRight);
         }
     }
+    /* 
     public static class CustomH2 implements Heuristic {
-        // h2 is the manhattan distance of the side being solved
+        // h2 is the max manhattan distance of the right and bottom tiles to their goal locations
+        public int heuristic(Puzzle p) {
+            int manhattanBottom = 0;
+            int manhattanRight = 0;
+            
+            int i =p.length-1;
+            for (int j = 0; j < p.width; j++) {
+                if (p.data[i][j] == 0) continue;
+                int val = p.data[i][j];
+                int y = val % p.data[i].length;
+                int x = (val - y) / p.data.length;
+                manhattanBottom += Math.abs(i - x) + Math.abs(j - y);         
+            }
+
+           
+            for (i = 0; i < p.length; i++) {
+                int j = p.width-1;
+                if (p.data[i][j] == 0) continue;
+                int val = p.data[i][j];
+                int y = val % p.data[i].length;
+                int x = (val - y) / p.data.length;
+                manhattanBottom += Math.abs(i - x) + Math.abs(j - y);         
+            }
+            
+            return Math.min(manhattanBottom,manhattanRight);
+        }
+    }
+    */
+
+    public static class CustomH2 implements Heuristic {
+        // h2 is the manhattan distance of the side tiles to the side being solved
         public int heuristic(Puzzle p) {
 
             boolean solvingBottom = p.length >= p.width;
             
-            int manhattan = 0;
-          
+            int manhattan= 0;
             if(solvingBottom){
-                int i =p.length-1;
+                int i = p.length-1;
                 for (int j = 0; j < p.width; j++) {
                     if (p.data[i][j] == 0) continue;
                     int val = p.data[i][j];
@@ -454,6 +481,7 @@ final class Puzzle {
                     manhattan += Math.abs(i - x) + Math.abs(j - y);         
                 }
             }
+           
             return manhattan;
         }
     }
