@@ -3,12 +3,8 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
-import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
-
-import javax.swing.JApplet;
-import javax.swing.text.DefaultStyledDocument.ElementSpec;
 
 final class Puzzle {
 
@@ -507,18 +503,24 @@ final class Puzzle {
         pastPuzzles.add(this);
         while (!q.isEmpty()) {
 
-            int queueSize = q.size();
+            // At start you only have 1 state so check all the states if there is less than k
+            if(k < q.size()){
+                k =Integer.parseInt(string);
+            }
+            else{
+                k=q.size();
+            }
 
             // Selecting the next k children for a solution
             Puzzle[] nextPuzzle = new Puzzle[k];
-            for (int i = 0; (i < k) && (i < queueSize); i++) {
+            for (int i = 0; i < k; i++) {
                 nextPuzzle[i] = q.poll();
                 if (nextPuzzle[i].solved()) {
                     return nextPuzzle[i];
                 }
             }
 
-            for (int j = 0; (j < k) && (j < queueSize); j++) {
+            for (int j = 0; j<k; j++) {
                 Puzzle[] puzzles = nextPuzzle[j].childrenPuzzles();
                 for (int i = 0; i < puzzles.length; i++) {
 
@@ -533,6 +535,7 @@ final class Puzzle {
     }
 
     // customAStar
+    // A* which divide and Conqueres the stateSpace by solving sides first
     public Puzzle customAStar(String heuristic) {
         HeuristicComparator comparator = heuristic(heuristic);
         HashSet<Puzzle> pastPuzzles = new HashSet<Puzzle>(stateSpaceSize());
@@ -594,7 +597,7 @@ final class Puzzle {
         return result;
     }
 
-    // Generates a hashcode for the Puzzle based on the data
+    // Deteremines if a puzzle is eqilvanelt by comparing the data arrays
     @Override
     public boolean equals(Object o) {
         if (o == this) {
@@ -655,7 +658,6 @@ final class Puzzle {
         }
         return true;
     }
-
 
     // Given a bfs puzzle checks if a puzzle is solved optimally
     public boolean optimal(Puzzle bfs) {
