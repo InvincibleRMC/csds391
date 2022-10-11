@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
 import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 
 final class Puzzle {
 
@@ -237,12 +236,11 @@ final class Puzzle {
 
     // Randomizes a state n times
     public void randomizeState(int n) {
-
-        // TODO: add seeding
-        // final Random r = new Random();
+        final Random r = new Random();
+        long seed = 123456789;
+        r.setSeed(seed);
         for (int i = 0; i <= n; i++) {
-            // r.randInt()
-            move(moveOptions[ThreadLocalRandom.current().nextInt(0, moveOptions.length)]);
+            move(moveOptions[r.nextInt(moveOptions.length)]);
         }
     }
 
