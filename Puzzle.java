@@ -6,7 +6,7 @@ import java.util.PriorityQueue;
 import java.util.Random;
 
 final class Puzzle {
-    
+
     private static final String MOVE_UP = "up";
     private static final String MOVE_LEFT = "left";
     private static final String MOVE_RIGHT = "right";
@@ -27,27 +27,6 @@ final class Puzzle {
     // Path Cost
     private final int g;
 
-    // Creates a Puzzle based off a given string state
-    public static Puzzle createFromString(String stringState) {
-
-        String[] commandInput = stringState.split(" ");
-        int[][] state = new int[commandInput.length][commandInput[1].length()];
-        for (int i = 0; i < state.length; i++) {
-
-            String[] stateLine = (commandInput[i].replace('b', '0')).split("");
-            for (int j = 0; j < state[0].length; j++) {
-                state[i][j] = Integer.parseInt(stateLine[j]);
-            }
-        }
-        int length = state.length;
-        int width = state[0].length;
-        int g = 0;
-        String moveMadeTo = "";
-        long diffTime = Long.MIN_VALUE;
-        int nodeCount = 0;
-        return new Puzzle(width, length, state, moveMadeTo, g,diffTime,nodeCount);
-    }
-
     // Creates a starting Puzzle of n by m
     public static Puzzle createFromDimension(int n, int m) {
 
@@ -64,8 +43,15 @@ final class Puzzle {
         int g = 0;
         String moveMadeTo = "";
         long diffTime = Long.MIN_VALUE;
-        int nodeCount =0;
-        return new Puzzle(width, length, data, moveMadeTo, g,diffTime,nodeCount);
+        int nodeCount = 0;
+        return new Puzzle(width, length, data, moveMadeTo, g, diffTime, nodeCount);
+    }
+
+    // Creates a Puzzle based off a given string state
+    public static Puzzle createFromString(String stringState) {
+
+        String[] commandInput = stringState.split(" ");
+        return Puzzle.createFromDimension(commandInput.length,commandInput[1].length());
     }
 
     // Creates a starting Puzzle of n by n
@@ -75,14 +61,14 @@ final class Puzzle {
 
     // Creates a resets a Puzzles dimensions
     public static Puzzle resetDimenstion(Puzzle p) {
-        return new Puzzle(p.data[0].length, p.data.length, copyData(p), p.moveMadeTo, p.g,p.diffTime,p.nodeCount);
+        return new Puzzle(p.data[0].length, p.data.length, copyData(p), p.moveMadeTo, p.g, p.diffTime, p.nodeCount);
     }
 
     // Puzzle move
     public static Puzzle move(Puzzle p, String direction) {
         String moveMadeTo = p.moveMadeTo + " " + direction;
         int pathCost = p.g + 1;
-        Puzzle puzzle = new Puzzle(p.width, p.length, copyData(p), moveMadeTo, pathCost,p.diffTime,p.nodeCount);
+        Puzzle puzzle = new Puzzle(p.width, p.length, copyData(p), moveMadeTo, pathCost, p.diffTime, p.nodeCount);
         puzzle.move(direction);
         return puzzle;
     }
@@ -91,13 +77,12 @@ final class Puzzle {
     public static Puzzle DivideAndConquer(Puzzle p) {
         int width = p.width;
         int length = p.length;
-        if(p.bottomSolved()){
+        if (p.bottomSolved()) {
             length--;
-        }
-        else{
+        } else {
             width--;
         }
-        return new Puzzle(width, length, copyData(p), p.moveMadeTo, p.g,p.diffTime,p.nodeCount);
+        return new Puzzle(width, length, copyData(p), p.moveMadeTo, p.g, p.diffTime, p.nodeCount);
     }
 
     // Copy Data 2d array helper
@@ -110,54 +95,63 @@ final class Puzzle {
     }
 
     // Private generic constructor
-    private Puzzle(int width, int length, int[][] data, String moveMadeTo, int g,long diffTime,int nodeCount) {
+    private Puzzle(int width, int length, int[][] data, String moveMadeTo, int g, long diffTime, int nodeCount) {
         this.width = width;
         this.length = length;
         this.data = data;
         this.moveMadeTo = moveMadeTo;
         this.g = g;
-        this.diffTime=diffTime;
-        this.nodeCount=nodeCount;
+        this.diffTime = diffTime;
+        this.nodeCount = nodeCount;
     }
 
     // Getters
-    public int getPathCost(){
+    public int getPathCost() {
         return g;
     }
-    public String getPath(){
+
+    public String getPath() {
         return moveMadeTo;
     }
-    public long getSolveTime(){
+
+    public long getSolveTime() {
         return diffTime;
     }
-    public int getNodeCount(){
+
+    public int getNodeCount() {
         return nodeCount;
     }
-    public int getMaxNodeCount(){
+
+    public int getMaxNodeCount() {
         return maxNodes;
     }
-    public String getResult(){
-        return  new String(g + " " + diffTime + " " + nodeCount + " " + maxNodes);
+
+    public String getResult() {
+        return new String(g + " " + diffTime + " " + nodeCount + " " + maxNodes);
     }
-    public void setNodeCount(int n){
-        nodeCount=n;
+
+    public void setNodeCount(int n) {
+        nodeCount = n;
     }
+
     // Setter
-    public void addNode(){
-        if((nodeCount==maxNodes) && (printMaxNodeError)){
-           System.out.println("Maxnode Count exceed");
+    public void addNode() {
+        if ((nodeCount == maxNodes) && (printMaxNodeError)) {
+            System.out.println("Maxnode Count exceed");
         }
         nodeCount++;
     }
-    
+
     // Sets the maximum amount of nodes an algorithm can search
     public static void maxNodes(String string) {
         maxNodes = Integer.parseInt(string);
     }
-    public static void disableMaxNodeError(){
+
+    public static void disableMaxNodeError() {
         printMaxNodeError = false;
     }
-    public static void enableMaxNodeError(){
+
+    public static void enableMaxNodeError() {
         printMaxNodeError = true;
     }
 
@@ -184,7 +178,7 @@ final class Puzzle {
     public void printStateVerbose() {
         System.out.println(toString() + "Path cost= " + g + " Path= " + moveMadeTo);
     }
-    
+
     // moves a given direction if valid
     public void move(String direction) {
         int[] swapLocation = calcSwapLocation(direction);
@@ -194,6 +188,7 @@ final class Puzzle {
             System.out.println("Cannot move edge in the way.");
         }
     }
+
     // Checks if a move is valid
     public boolean validMove(String direction) {
         return validSwap(calcSwapLocation(direction));
@@ -231,10 +226,10 @@ final class Puzzle {
 
     // Checks if a swap is valid
     public boolean validSwap(int[] swapLocation) {
-    
+
         int x = swapLocation[0];
         int y = swapLocation[1];
-        
+
         if (x < 0 || y < 0) {
             return false;
         }
@@ -263,7 +258,7 @@ final class Puzzle {
 
     // Finds the blank tile
     public int[] holeLocation() {
-        
+
         for (int i = 0; i < length; i++) {
             for (int j = 0; j < width; j++) {
                 if (data[i][j] == 0) {
@@ -274,32 +269,33 @@ final class Puzzle {
 
         // Error if hole is not found
         // Returns an Int to not throw error like if return null
-        
+
         System.out.println("COULDN'T find hole");
         return new int[] { Integer.MIN_VALUE, Integer.MIN_VALUE };
     }
 
     // Randomizes a state from txt
-    public void randomizeState(String times,long seed) {
-        randomizeState(Integer.parseInt(times),seed);
+    public void randomizeState(String times, long seed) {
+        randomizeState(Integer.parseInt(times), seed);
     }
 
     // Randomizes a state n times with a given seed
-    public void randomizeState(int n,long seed) {
+    public void randomizeState(int n, long seed) {
         final Random r = new Random();
         r.setSeed(seed);
         for (int i = 0; i <= n; i++) {
             move(moveOptions[r.nextInt(moveOptions.length)]);
         }
     }
+
     // Randomizes a state n times
     public void randomizeState(int n) {
         final Random r = new Random();
         for (int i = 0; i <= n; i++) {
             int randomDirection = r.nextInt(moveOptions.length);
             String direction = moveOptions[randomDirection];
-            if(validMove(direction))
-            move(direction);
+            if (validMove(direction))
+                move(direction);
         }
     }
 
@@ -342,7 +338,7 @@ final class Puzzle {
             return manhattan;
         }
     }
-    
+
     public static class BFS implements Heuristic {
         // no Heuristic for bfs
         public int heuristic(Puzzle p) {
@@ -366,6 +362,7 @@ final class Puzzle {
     private static final HeuristicComparator h1 = new HeuristicComparator(new H1());
     private static final HeuristicComparator h2 = new HeuristicComparator(new H2());
     private static final HeuristicComparator bfs = new HeuristicComparator(new BFS());
+
     // Parses the string into a HeuristicComparator
     private HeuristicComparator heuristic(String heuristic) {
         switch (heuristic) {
@@ -375,8 +372,8 @@ final class Puzzle {
             case "h2": {
                 return h2;
             }
-            
-            case "bfs":{
+
+            case "bfs": {
                 return bfs;
             }
             default: {
@@ -406,9 +403,9 @@ final class Puzzle {
             Puzzle p = q.poll();
             if (p.solved()) {
                 long endTime = System.nanoTime();
-                long diffTime = endTime-startTime;
-                p.diffTime=diffTime;
-                p.nodeCount=this.nodeCount;
+                long diffTime = endTime - startTime;
+                p.diffTime = diffTime;
+                p.nodeCount = this.nodeCount;
                 return p;
             }
             Puzzle[] puzzles = p.childrenPuzzles();
@@ -426,7 +423,7 @@ final class Puzzle {
 
     // beam search
     public Puzzle beam(String string) {
-        
+
         setNodeCount(0);
         long startTime = System.nanoTime();
         // Normally start with k states
@@ -439,23 +436,24 @@ final class Puzzle {
         addNode();
         while (!q.isEmpty()) {
 
-            // At start you only have 1 state so check all the states if there is less than k
-            k = startingK < q.size() ? startingK:q.size();
-           
+            // At start you only have 1 state so check all the states if there is less than
+            // k
+            k = startingK < q.size() ? startingK : q.size();
+
             // Selecting the next k children for a solution
             Puzzle[] nextPuzzle = new Puzzle[k];
             for (int i = 0; i < k; i++) {
                 nextPuzzle[i] = q.poll();
                 if (nextPuzzle[i].solved()) {
                     long endTime = System.nanoTime();
-                    long diffTime = endTime-startTime;
-                    nextPuzzle[i].diffTime=diffTime;
-                    nextPuzzle[i].nodeCount=this.nodeCount;
+                    long diffTime = endTime - startTime;
+                    nextPuzzle[i].diffTime = diffTime;
+                    nextPuzzle[i].nodeCount = this.nodeCount;
                     return nextPuzzle[i];
                 }
             }
 
-            for (int j = 0; j<k; j++) {
+            for (int j = 0; j < k; j++) {
                 Puzzle[] puzzles = nextPuzzle[j].childrenPuzzles();
                 for (int i = 0; i < puzzles.length; i++) {
                     if (pastPuzzles.add(puzzles[i])) {
@@ -485,22 +483,23 @@ final class Puzzle {
             Puzzle p = q.poll();
             if (p.solved()) {
                 long endTime = System.nanoTime();
-                long diffTime = endTime-startTime;
-                p.diffTime=diffTime;
-                p.nodeCount=this.nodeCount;
+                long diffTime = endTime - startTime;
+                p.diffTime = diffTime;
+                p.nodeCount = this.nodeCount;
                 return Puzzle.resetDimenstion(p);
             }
 
             // Stops at 3x2 State
-            if ((p.width + p.length > 5)){
-            
-                // If bottom solved shrink the problem or if bottom has been solved and the right has been solved
-                if((p.length >= p.width && p.bottomSolved()) || (p.width>p.length && p.rightSolved())) {
+            if ((p.width + p.length > 5)) {
+
+                // If bottom solved shrink the problem or if bottom has been solved and the
+                // right has been solved
+                if ((p.length >= p.width && p.bottomSolved()) || (p.width > p.length && p.rightSolved())) {
                     Puzzle small = Puzzle.DivideAndConquer(p);
-                    pastPuzzles=null;
+                    pastPuzzles = null;
                     return small.aStarDivideConquer(heuristic);
                 }
-             }
+            }
 
             Puzzle[] puzzles = p.childrenPuzzles();
             for (int i = 0; i < puzzles.length; i++) {
@@ -530,9 +529,9 @@ final class Puzzle {
     // returns the stateSpaceSize of a puzzle
     private int stateSpaceSize() {
         BigInteger maxSize = factorial(width * length).divide(BigInteger.valueOf(2));
-        //System.out.println(maxSize);
-        if (maxSize.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) >=0) {
-            return Integer.MAX_VALUE ;
+        // System.out.println(maxSize);
+        if (maxSize.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) >= 0) {
+            return Integer.MAX_VALUE;
         }
         return maxSize.intValue();
     }
@@ -602,22 +601,23 @@ final class Puzzle {
         }
         return true;
     }
+
     // Checks if a puzzle bottom is solved
     public boolean bottomSolved() {
-        int i = length-1;
-            for (int j = 0; j < width; j++) {
-                if (data[i][j] != i * width + j) {
-                    return false;
-                }
+        int i = length - 1;
+        for (int j = 0; j < width; j++) {
+            if (data[i][j] != i * width + j) {
+                return false;
             }
-        
+        }
+
         return true;
     }
 
     // Checks if a puzzle right side is solved
     public boolean rightSolved() {
         for (int i = 0; i < length; i++) {
-            int j =width-1;
+            int j = width - 1;
             if (data[i][j] != i * width + j) {
                 return false;
             }

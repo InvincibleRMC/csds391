@@ -13,123 +13,59 @@ public class Main {
 
     public static void main(String[] args) {
 
+        //expirement();
+        //expirement(4);
+        String folder = "Code_Correctness/";
+        String fileName = "setStateTest.txt";
         try {
-           data();
-        } catch (Exception e) {
-
+            fromFile(folder + fileName);
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        /*
-         * String fileName = "input.txt";
-         * fromFile(fileName);
-         */
+         
     }
 
-    public static void data() throws Exception {
+    public static void expirement() {
         String startingState = "012 345 678";
-        // String startingState15="154 028 736";
-        // startingState=startingState15;
-        // bfs testing
         int dataSample = 100;
 
         for (int i = 0; i < dataSample; i++) {
 
             Puzzle random = Puzzle.createFromString(startingState);
             random.randomizeState(100);
-            //random.printState();
-
-            Puzzle.maxNodes(String.valueOf(100*i));
+        
+            Puzzle.maxNodes(String.valueOf(100 * i));
             Puzzle.disableMaxNodeError();
 
-            /* 
-            System.out.println("Starting Solve\n\n\n");
-
-            Puzzle bfs = random.bfs();
-
-            random.printState();
-            bfs.printStateVerbose();
-            // System.out.println(p.g);
-            if (!bfs.solved()) {
-                throw new Exception("Did not solve BFS");
-            }
-            System.out.println("Bfs done");
-            */
-            /* 
-            System.out.println("A* h1");
-            // A*
-
-            System.out.println("Starting Solve\n\n\n ");
-            */
-           // System.out.println(random.getNodeCount());
             Puzzle astarh1 = random.aStar("h1");
-           // System.out.println(random.getNodeCount());
-            /* 
-            System.out.print("Starting State");
-            random.printState();
-            System.out.println("hopefully solved");
-            astarh1.printStateVerbose();
-
-            if (!astarh1.solved() || !astarh1.optimal(bfs)) {
-                throw new Exception("Did not solve A*1");
-            }
-
-            System.out.println("A* h2");
-            // A*
-
-            // System.out.print(astarh1.pastPuzzle.toString());
-            // astarh2.printState();
-
-            System.out.println("Starting Solve\n\n\n ");
-            */
-          //  System.out.println("starting with" + random.getNodeCount());
             Puzzle astarh2 = random.aStar("h2");
-           // System.out.println(random.getNodeCount());
-            /* 
-            System.out.print("Starting State");
-            random.printState();
-            System.out.println("hopefully solved");
-            astarh2.printStateVerbose();
-
-            if (!astarh2.solved() || !astarh2.optimal(bfs)) {
-                throw new Exception("Did not solve A*2");
-            }
-            System.out.println("A* h2");
-
-            // beam
-            System.out.println("Starting Solve\n\n\n ");
-            */
-            Puzzle beam = random.beam("10");
-            /* 
-            System.out.print("Starting State");
-            random.printState();
-            System.out.println("hopefully solved");
-            beam.printStateVerbose();
-
-            if (!beam.solved()) {
-                throw new Exception("Did not solve beam");
-            }
-
-            // beam
-           / System.out.println("Starting Solve\n\n\n ");
-            */
+            Puzzle beam = random.beam("25");
             Puzzle divideAndConquer = random.aStarDivideConquer("h2");
-            /* 
-            //System.out.print("Starting State");
-            random.printState();
-            //System.out.println("hopefully solved");
-            divideAndConquer.printStateVerbose();
 
-            if (!divideAndConquer.solved()) {
-                throw new Exception("Did not solve customAStar");
-            }
-            */
-            Puzzle[] algorithms = new Puzzle[] {astarh1,astarh2,beam,divideAndConquer};
-           
-            for(int j=0;j<algorithms.length;j++){
+            Puzzle[] algorithms = new Puzzle[] { astarh1, astarh2, beam, divideAndConquer };
+
+            for (int j = 0; j < algorithms.length; j++) {
                 System.out.print(algorithms[j].getResult() + " ");
             }
             System.out.println();
+
+        }
+
+    }
+
+    public static void expirement(int n) {
         
+        int dataSample = 10;
+
+        for (int i = 0; i < dataSample; i++) {
+
+            Puzzle random = Puzzle.createFromDimension(n);
+            random.randomizeState(1000);
+        
+            Puzzle divideAndConquer = random.aStarDivideConquer("h2");
+            System.out.print(divideAndConquer.getResult() + " ");
+            
+            System.out.println();
         }
 
     }
@@ -163,12 +99,16 @@ public class Main {
         switch (commandInput[0]) {
             case "setState": {
                 System.out.println("Setting state");
+               
+                if((commandInput[1].equals("n="))){
+                    puzzle= Puzzle.createFromDimension(Integer.parseInt(commandInput[2]));
+                    return;
+                }    
 
                 String state = "";
                 for (int i = 1; i < commandInput.length; i++) {
-                    state += commandInput[i];
+                    state += commandInput[i]+ " ";
                 }
-
                 puzzle = Puzzle.createFromString(state);
                 return;
             }
@@ -183,7 +123,7 @@ public class Main {
                 return;
             }
             case "randomizeState": {
-                puzzle.randomizeState(commandInput[1],SEED);
+                puzzle.randomizeState(commandInput[1], SEED);
                 return;
             }
             case "solve": {

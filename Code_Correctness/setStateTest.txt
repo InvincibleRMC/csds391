@@ -1,0 +1,4 @@
+setState b12 346 678
+printState
+setState n= 4
+printState
