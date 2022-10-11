@@ -5,7 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-public class main {
+public class Main {
 
     static Puzzle puzzle;
     public static void main(String[] args) {
@@ -210,6 +210,10 @@ public class main {
                 return;
             } 
         }
+
+    } 
+    //TODO:
+    public static void CSV(){
 
     }
 
