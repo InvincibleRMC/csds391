@@ -449,24 +449,20 @@ final class Puzzle {
         return this;
     }
 
+    // beam search
     public Puzzle beam(String string) {
         // Normally start with k states
         int startingK = Integer.parseInt(string);
         int k = startingK;
         HashSet<Puzzle> pastPuzzles = new HashSet<Puzzle>(stateSpaceSize());
-        PuzzlePriorityQueue q = new PuzzlePriorityQueue(h2);
+        PuzzlePriorityQueue q = new PuzzlePriorityQueue(h1);
         q.add(this);
         pastPuzzles.add(this);
         while (!q.isEmpty()) {
 
             // At start you only have 1 state so check all the states if there is less than k
-            if(startingK < q.size()){
-                k = startingK;
-            }
-            else{
-                k = q.size();
-            }
-            System.out.println(k + " " + q.size());
+            k = startingK < q.size() ? startingK:q.size();
+           
             // Selecting the next k children for a solution
             Puzzle[] nextPuzzle = new Puzzle[k];
             for (int i = 0; i < k; i++) {
@@ -490,7 +486,7 @@ final class Puzzle {
     }
 
     // aStarDivideConquer
-    // A* which divide and Conqueres the stateSpace by solving sides first
+    // A* which divide and Conquers the stateSpace by solving sides first
     public Puzzle aStarDivideConquer(String heuristic) {
         HeuristicComparator comparator = heuristic(heuristic);
         HashSet<Puzzle> pastPuzzles = new HashSet<Puzzle>(stateSpaceSize());
@@ -503,6 +499,7 @@ final class Puzzle {
                 return Puzzle.resetDimenstion(p);
             }
 
+            // Stops at 3x2 State
             if ((p.width + p.length > 5)){
             
                 // If bottom solved shrink the problem or if bottom has been solved and the right has been solved
