@@ -14,7 +14,7 @@ public class Main {
     public static void main(String[] args) {
 
         try {
-            System.out.println(test());
+           data();
         } catch (Exception e) {
 
             e.printStackTrace();
@@ -25,24 +25,26 @@ public class Main {
          */
     }
 
-    public static boolean test() throws Exception {
+    public static void data() throws Exception {
         String startingState = "012 345 678";
         // String startingState15="154 028 736";
         // startingState=startingState15;
         // bfs testing
-        boolean test = true;
-        for (int i = 0; i < 1; i++) {
+        int dataSample = 100;
+
+        for (int i = 0; i < dataSample; i++) {
+
             Puzzle random = Puzzle.createFromString(startingState);
-
             random.randomizeState(100);
-            random.printState();
+            //random.printState();
 
-            Puzzle.maxNodes("10");
+            Puzzle.maxNodes(String.valueOf(100*i));
+            Puzzle.disableMaxNodeError();
+
+            /* 
             System.out.println("Starting Solve\n\n\n");
 
-            long startBFS = System.nanoTime();
             Puzzle bfs = random.bfs();
-            long diffBFS = System.nanoTime() - startBFS;
 
             random.printState();
             bfs.printStateVerbose();
@@ -51,16 +53,17 @@ public class Main {
                 throw new Exception("Did not solve BFS");
             }
             System.out.println("Bfs done");
-
+            */
+            /* 
             System.out.println("A* h1");
             // A*
 
             System.out.println("Starting Solve\n\n\n ");
-
-            long startAStarh1 = System.nanoTime();
+            */
+           // System.out.println(random.getNodeCount());
             Puzzle astarh1 = random.aStar("h1");
-            long diffAStarh1 = System.nanoTime() - startAStarh1;
-
+           // System.out.println(random.getNodeCount());
+            /* 
             System.out.print("Starting State");
             random.printState();
             System.out.println("hopefully solved");
@@ -77,11 +80,11 @@ public class Main {
             // astarh2.printState();
 
             System.out.println("Starting Solve\n\n\n ");
-
-            long startAStarh2 = System.nanoTime();
+            */
+          //  System.out.println("starting with" + random.getNodeCount());
             Puzzle astarh2 = random.aStar("h2");
-            long diffAStarh2 = System.nanoTime() - startAStarh2;
-
+           // System.out.println(random.getNodeCount());
+            /* 
             System.out.print("Starting State");
             random.printState();
             System.out.println("hopefully solved");
@@ -94,11 +97,9 @@ public class Main {
 
             // beam
             System.out.println("Starting Solve\n\n\n ");
-
-            long startBeam = System.nanoTime();
+            */
             Puzzle beam = random.beam("10");
-            long diffBeam = System.nanoTime() - startBeam;
-
+            /* 
             System.out.print("Starting State");
             random.printState();
             System.out.println("hopefully solved");
@@ -109,25 +110,28 @@ public class Main {
             }
 
             // beam
-            System.out.println("Starting Solve\n\n\n ");
-
-            long startNXM = System.nanoTime();
-            Puzzle nxm = random.aStarDivideConquer("h2");
-            long diffNXM = System.nanoTime() - startNXM;
-
-            System.out.print("Starting State");
+           / System.out.println("Starting Solve\n\n\n ");
+            */
+            Puzzle divideAndConquer = random.aStarDivideConquer("h2");
+            /* 
+            //System.out.print("Starting State");
             random.printState();
-            System.out.println("hopefully solved");
-            nxm.printStateVerbose();
+            //System.out.println("hopefully solved");
+            divideAndConquer.printStateVerbose();
 
-            if (!nxm.solved()) {
+            if (!divideAndConquer.solved()) {
                 throw new Exception("Did not solve customAStar");
             }
-
-            System.out.println(diffBFS + " " + diffAStarh1 + " " + diffAStarh2 + " " + diffBeam + " " + diffNXM);
+            */
+            Puzzle[] algorithms = new Puzzle[] {astarh1,astarh2,beam,divideAndConquer};
+           
+            for(int j=0;j<algorithms.length;j++){
+                System.out.print(algorithms[j].getResult() + " ");
+            }
+            System.out.println();
+        
         }
 
-        return test;
     }
 
     public static void fromFile(String filename) throws FileNotFoundException {
@@ -150,7 +154,7 @@ public class Main {
     }
 
     public static void commandHandler(String commandAndInput) {
-
+        Puzzle.enableMaxNodeError();
         String[] commandInput = commandAndInput.split(" ");
         for (int i = 0; i < commandInput.length; i++) {
             System.out.print(commandInput[i] + " ");
@@ -211,11 +215,6 @@ public class Main {
                 return;
             }
         }
-
-    }
-
-    // TODO:
-    public static void CSV() {
 
     }
 
