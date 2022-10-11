@@ -8,6 +8,8 @@ import java.io.InputStreamReader;
 public class Main {
 
     static Puzzle puzzle;
+    // Randomization seed
+    private static final long SEED = 123456789;
 
     public static void main(String[] args) {
 
@@ -33,6 +35,8 @@ public class Main {
             Puzzle random = Puzzle.createFromString(startingState);
 
             random.randomizeState(100);
+            random.printState();
+
             Puzzle.maxNodes("10");
             System.out.println("Starting Solve\n\n\n");
 
@@ -175,7 +179,7 @@ public class Main {
                 return;
             }
             case "randomizeState": {
-                puzzle.randomizeState(commandInput[1]);
+                puzzle.randomizeState(commandInput[1],SEED);
                 return;
             }
             case "solve": {

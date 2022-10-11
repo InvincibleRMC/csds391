@@ -230,15 +230,21 @@ final class Puzzle {
     }
 
     // Randomizes a state from txt
-    public void randomizeState(String times) {
-        randomizeState(Integer.parseInt(times));
+    public void randomizeState(String times,long seed) {
+        randomizeState(Integer.parseInt(times),seed);
     }
 
+    // Randomizes a state n times with a given seed
+    public void randomizeState(int n,long seed) {
+        final Random r = new Random();
+        r.setSeed(seed);
+        for (int i = 0; i <= n; i++) {
+            move(moveOptions[r.nextInt(moveOptions.length)]);
+        }
+    }
     // Randomizes a state n times
     public void randomizeState(int n) {
         final Random r = new Random();
-        long seed = 123456789;
-        r.setSeed(seed);
         for (int i = 0; i <= n; i++) {
             move(moveOptions[r.nextInt(moveOptions.length)]);
         }
