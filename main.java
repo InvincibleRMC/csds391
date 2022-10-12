@@ -12,45 +12,72 @@ public class Main {
     private static final long SEED = 123456789;
 
     public static void main(String[] args) {
-
+        // testXY();
         expirement();
-        //expirement(4);
-        /* 
-        String folder = "Code_Correctness/";
-        String setStateTest = "setStateTest.txt";
-        String impossible = "impossible.txt";
-        String astarh1 = "astarh1.txt";
-        String astarh2 = "astarh2.txt";
-        String beam = "beam.txt";
-        String divideAndConquer = "divideAndConquer.txt";
-        String fileName = divideAndConquer;
-        try {
-            fromFile(folder + fileName);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        */
-       // Puzzle p = Puzzle.createFromString("325 167 84b");
-       // System.out.println(heuristic(p));
-         
+        // expirement(4);
+        /*
+         * String folder = "Code_Correctness/";
+         * String setStateTest = "setStateTest.txt";
+         * String impossible = "impossible.txt";
+         * String astarh1 = "astarh1.txt";
+         * String astarh2 = "astarh2.txt";
+         * String beam = "beam.txt";
+         * String divideAndConquer = "divideAndConquer.txt";
+         * String fileName = divideAndConquer;
+         * try {
+         * fromFile(folder + fileName);
+         * } catch (FileNotFoundException e) {
+         * e.printStackTrace();
+         * }
+         */
+        // Puzzle p = Puzzle.createFromString("325 167 84b");
+        // System.out.println(heuristic(p));
+
     }
 
-    public static int heuristic(Puzzle p) {
-        int manhattan = 0;
-        for (int i = 0; i < p.length; i++) {
-            for (int j = 0; j < p.width; j++) {
-                if (p.data[i][j] == 0)
-                    continue;
-                int val = p.data[i][j];
-
-                int y = val % p.width;
-                int x = (val - y) / p.length;
-                manhattan += Math.abs(i - x) + Math.abs(j - y);
-            }
+    public static void assertEquals(int e, int r) {
+        if (e != r) {
+            throw new AssertionError("Expeceted " + e + " recieved " + r);
         }
-        return manhattan;
     }
 
+    public static void testXY() {
+        // 2x3
+        // b12
+        // 345
+        // b 0 0
+        // 1 0 1
+        // 2 0 2
+        // 3 1 0
+        // 4 1 1
+        // 5 1 2
+        int width = 3;
+
+        assertEquals(0, Puzzle.valFromXY(width, 0, 0));
+        assertEquals(1, Puzzle.valFromXY(width, 0, 1));
+        assertEquals(2, Puzzle.valFromXY(width, 0, 2));
+        assertEquals(3, Puzzle.valFromXY(width, 1, 0));
+        assertEquals(4, Puzzle.valFromXY(width, 1, 1));
+        assertEquals(5, Puzzle.valFromXY(width, 1, 2));
+
+        assertEquals(0, Puzzle.xFromVal(width, 0));
+        assertEquals(0, Puzzle.yFromVal(width, 0));
+
+        assertEquals(0, Puzzle.xFromVal(width, 1));
+        assertEquals(1, Puzzle.yFromVal(width, 1));
+
+        assertEquals(0, Puzzle.xFromVal(width, 2));
+        assertEquals(2, Puzzle.yFromVal(width, 2));
+
+        assertEquals(1, Puzzle.xFromVal(width, 3));
+        assertEquals(0, Puzzle.yFromVal(width, 3));
+
+        assertEquals(1, Puzzle.xFromVal(width, 4));
+        assertEquals(1, Puzzle.yFromVal(width, 4));
+
+        assertEquals(1, Puzzle.xFromVal(width, 5));
+        assertEquals(2, Puzzle.yFromVal(width, 5));
+    }
 
     public static void expirement() {
         String startingState = "012 345 678";
@@ -60,8 +87,6 @@ public class Main {
 
             Puzzle random = Puzzle.createFromString(startingState);
             random.randomizeState(100);
-        
-            //random = Puzzle.createFromString("325 167 84b");
 
             Puzzle.maxNodes(String.valueOf(100 * i));
             Puzzle.disableMaxNodeError();
@@ -82,25 +107,23 @@ public class Main {
     }
 
     public static void expirement(int n) {
-        
+
         int dataSample = 10;
 
         for (int i = 0; i < dataSample; i++) {
 
             Puzzle random = Puzzle.createFromDimension(n);
             random.randomizeState(1000);
-        
+
             Puzzle divideAndConquer = random.aStarDivideConquer("h2");
             System.out.print(divideAndConquer.getResult() + " ");
-            
+
             System.out.println();
         }
 
     }
 
     public static void fromFile(String filename) throws FileNotFoundException {
-        // maybe try-catch could be more elegant
-
         File inputFile = new File(filename);
         FileInputStream inputStream = new FileInputStream(inputFile);
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
@@ -123,15 +146,15 @@ public class Main {
         switch (commandInput[0]) {
             case "setState": {
                 System.out.println("Setting state");
-               
-                if((commandInput[1].equals("n="))){
-                    puzzle= Puzzle.createFromDimension(Integer.parseInt(commandInput[2]));
+
+                if ((commandInput[1].equals("n="))) {
+                    puzzle = Puzzle.createFromDimension(Integer.parseInt(commandInput[2]));
                     return;
-                }    
+                }
 
                 String state = "";
                 for (int i = 1; i < commandInput.length; i++) {
-                    state += commandInput[i]+ " ";
+                    state += commandInput[i] + " ";
                 }
                 puzzle = Puzzle.createFromString(state);
                 return;
@@ -141,8 +164,6 @@ public class Main {
                 return;
             }
             case "move": {
-                // System.out.println(commandInput[0]);
-                // System.out.println("moving");
                 puzzle.move(commandInput[1]);
                 return;
             }
@@ -178,7 +199,7 @@ public class Main {
                 Puzzle.maxNodes(commandInput[1]);
                 return;
             }
-            case "//":{
+            case "//": {
                 return;
             }
             default: {

@@ -5,6 +5,8 @@ import java.util.LinkedList;
 import java.util.PriorityQueue;
 import java.util.Random;
 
+import javax.management.RuntimeErrorException;
+
 final class Puzzle {
 
     private static final String MOVE_UP = "up";
@@ -336,23 +338,22 @@ final class Puzzle {
 
     public static class H2 implements Heuristic {
         // h2 is the manhattan distance of the tiles to their goal locations
+
         public int heuristic(Puzzle p) {
-           p.printState();
             int manhattan = 0;
             for (int i = 0; i < p.length; i++) {
                 for (int j = 0; j < p.width; j++) {
                     if (p.data[i][j] == 0)
                         continue;
                     int val = p.data[i][j];
+                    int y = yFromVal(p.width, val);
+                    int x = xFromVal(p.width, val);
 
-                    int y = val % p.width;
-                    int x = (val - y) / p.length;
                     int manhattanVal = Math.abs(i - x) + Math.abs(j - y);
                     manhattan += manhattanVal;
-                    System.out.println("val location= " + i + "," + j +" manhattanVal " +manhattanVal);
+
                 }
             }
-           System.out.println(manhattan);
             return manhattan;
         }
     }
@@ -408,7 +409,7 @@ final class Puzzle {
 
     // aStar
     public Puzzle aStar(String heuristic) {
-      
+
         setNodeCount(0);
         long startTime = System.nanoTime();
         HeuristicComparator comparator = heuristic(heuristic);
@@ -434,7 +435,6 @@ final class Puzzle {
                 }
             }
         }
-
         System.out.println("Given an invalid starting state");
         return this;
     }
@@ -527,7 +527,6 @@ final class Puzzle {
                 }
             }
         }
-
         System.out.println("Given an invalid starting state");
         return this;
     }
@@ -610,14 +609,29 @@ final class Puzzle {
 
     // Checks if a puzzle is solved
     public boolean solved() {
-        for (int i = 0; i < data.length; i++) {
-            for (int j = 0; j < data[0].length; j++) {
-                if (data[i][j] != i * data.length + j) {
+
+        int width = this.width;
+        int length = this.length;
+        for (int i = 0; i < length; i++) {
+            for (int j = 0; j < width; j++) {
+                if (data[i][j] != valFromXY(width, i, j)) {
                     return false;
                 }
             }
         }
         return true;
+    }
+
+    public static int valFromXY(int width, int i, int j) {
+        return i * width + j;
+    }
+
+    public static int xFromVal(int width, int val) {
+        return val / width;
+    }
+
+    public static int yFromVal(int width, int val) {
+        return val % width;
     }
 
     // Checks if a puzzle bottom is solved
