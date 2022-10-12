@@ -16,9 +16,9 @@ final class Puzzle {
     private static int maxNodes = Integer.MAX_VALUE;
     private static boolean printMaxNodeError = true;
 
-    private final int width;
-    private final int length;
-    private final int[][] data;
+    public final int width;
+    public final int length;
+    public final int[][] data;
     private long diffTime;
     private int nodeCount;
     // moveMadeTo is a String list of moves from the starting state the solved
@@ -337,6 +337,7 @@ final class Puzzle {
     public static class H2 implements Heuristic {
         // h2 is the manhattan distance of the tiles to their goal locations
         public int heuristic(Puzzle p) {
+           p.printState();
             int manhattan = 0;
             for (int i = 0; i < p.length; i++) {
                 for (int j = 0; j < p.width; j++) {
@@ -346,9 +347,12 @@ final class Puzzle {
 
                     int y = val % p.width;
                     int x = (val - y) / p.length;
-                    manhattan += Math.abs(i - x) + Math.abs(j - y);
+                    int manhattanVal = Math.abs(i - x) + Math.abs(j - y);
+                    manhattan += manhattanVal;
+                    System.out.println("val location= " + i + "," + j +" manhattanVal " +manhattanVal);
                 }
             }
+           System.out.println(manhattan);
             return manhattan;
         }
     }

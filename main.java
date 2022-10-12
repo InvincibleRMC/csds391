@@ -13,8 +13,9 @@ public class Main {
 
     public static void main(String[] args) {
 
-        //expirement();
+        expirement();
         //expirement(4);
+        /* 
         String folder = "Code_Correctness/";
         String setStateTest = "setStateTest.txt";
         String impossible = "impossible.txt";
@@ -22,14 +23,34 @@ public class Main {
         String astarh2 = "astarh2.txt";
         String beam = "beam.txt";
         String divideAndConquer = "divideAndConquer.txt";
-        String fileName = impossible;
+        String fileName = divideAndConquer;
         try {
             fromFile(folder + fileName);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+        */
+       // Puzzle p = Puzzle.createFromString("325 167 84b");
+       // System.out.println(heuristic(p));
          
     }
+
+    public static int heuristic(Puzzle p) {
+        int manhattan = 0;
+        for (int i = 0; i < p.length; i++) {
+            for (int j = 0; j < p.width; j++) {
+                if (p.data[i][j] == 0)
+                    continue;
+                int val = p.data[i][j];
+
+                int y = val % p.width;
+                int x = (val - y) / p.length;
+                manhattan += Math.abs(i - x) + Math.abs(j - y);
+            }
+        }
+        return manhattan;
+    }
+
 
     public static void expirement() {
         String startingState = "012 345 678";
@@ -40,16 +61,17 @@ public class Main {
             Puzzle random = Puzzle.createFromString(startingState);
             random.randomizeState(100);
         
+            //random = Puzzle.createFromString("325 167 84b");
+
             Puzzle.maxNodes(String.valueOf(100 * i));
             Puzzle.disableMaxNodeError();
 
             Puzzle astarh1 = random.aStar("h1");
             Puzzle astarh2 = random.aStar("h2");
-            Puzzle beam = random.beam("25");
+            Puzzle beam = random.beam("5");
             Puzzle divideAndConquer = random.aStarDivideConquer("h2");
 
             Puzzle[] algorithms = new Puzzle[] { astarh1, astarh2, beam, divideAndConquer };
-
             for (int j = 0; j < algorithms.length; j++) {
                 System.out.print(algorithms[j].getResult() + " ");
             }
