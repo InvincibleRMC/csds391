@@ -1,0 +1,14 @@
+// Will take forever
+setState 1b3 245 678
+printState
+solve A-star h1
+setState 1b3 245 678
+printState
+solve A-star h2
+setState 1b3 245 678
+printState
+solve beam 100
+setState 1b3 245 678
+printState
+solve d&c
+

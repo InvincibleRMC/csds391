@@ -16,7 +16,13 @@ public class Main {
         //expirement();
         //expirement(4);
         String folder = "Code_Correctness/";
-        String fileName = "setStateTest.txt";
+        String setStateTest = "setStateTest.txt";
+        String impossible = "impossible.txt";
+        String astarh1 = "astarh1.txt";
+        String astarh2 = "astarh2.txt";
+        String beam = "beam.txt";
+        String divideAndConquer = "divideAndConquer.txt";
+        String fileName = impossible;
         try {
             fromFile(folder + fileName);
         } catch (FileNotFoundException e) {
@@ -81,12 +87,8 @@ public class Main {
         try {
             input.close();
         } catch (IOException e) {
-            // System.out.println("Finished Command File");
+            e.printStackTrace();
         }
-        System.out.println(puzzle.solved());
-        // System.out.println(puzzle.holeLocation()[0] + " " +
-        // puzzle.holeLocation()[1]);
-
     }
 
     public static void commandHandler(String commandAndInput) {
@@ -128,16 +130,20 @@ public class Main {
             }
             case "solve": {
                 switch (commandInput[1]) {
-                    case "A-Star": {
-                        puzzle.aStar(commandInput[2]);
+                    case "A-star": {
+                        puzzle = puzzle.aStar(commandInput[2]);
                         return;
                     }
                     case "beam": {
-                        puzzle.beam(commandInput[2]);
+                        puzzle = puzzle.beam(commandInput[2]);
                         return;
                     }
                     case "bfs": {
-                        puzzle.bfs();
+                        puzzle = puzzle.bfs();
+                        return;
+                    }
+                    case "d&c": {
+                        puzzle = puzzle.aStarDivideConquer("h2");
                         return;
                     }
                     default: {
@@ -148,6 +154,9 @@ public class Main {
             }
             case "maxNodes": {
                 Puzzle.maxNodes(commandInput[1]);
+                return;
+            }
+            case "//":{
                 return;
             }
             default: {

@@ -1,3 +1,0 @@
-setState 412 3b5 678
-randomizeState 69
-printState

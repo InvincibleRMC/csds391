@@ -1,0 +1,6 @@
+setState b12 345 678
+printState
+randomizeState 100
+printState
+solve beam 50
+printState

@@ -27,6 +27,27 @@ final class Puzzle {
     // Path Cost
     private final int g;
 
+    // Creates a Puzzle based off a given string state
+    public static Puzzle createFromString(String stringState) {
+
+        String[] commandInput = stringState.split(" ");
+        int[][] state = new int[commandInput.length][commandInput[1].length()];
+        for (int i = 0; i < state.length; i++) {
+
+            String[] stateLine = (commandInput[i].replace('b', '0')).split("");
+            for (int j = 0; j < state[0].length; j++) {
+                state[i][j] = Integer.parseInt(stateLine[j]);
+            }
+        }
+        int length = state.length;
+        int width = state[0].length;
+        int g = 0;
+        String moveMadeTo = "";
+        long diffTime = Long.MIN_VALUE;
+        int nodeCount = 0;
+        return new Puzzle(width, length, state, moveMadeTo, g, diffTime, nodeCount);
+    }
+
     // Creates a starting Puzzle of n by m
     public static Puzzle createFromDimension(int n, int m) {
 
@@ -45,13 +66,6 @@ final class Puzzle {
         long diffTime = Long.MIN_VALUE;
         int nodeCount = 0;
         return new Puzzle(width, length, data, moveMadeTo, g, diffTime, nodeCount);
-    }
-
-    // Creates a Puzzle based off a given string state
-    public static Puzzle createFromString(String stringState) {
-
-        String[] commandInput = stringState.split(" ");
-        return Puzzle.createFromDimension(commandInput.length,commandInput[1].length());
     }
 
     // Creates a starting Puzzle of n by n
@@ -390,7 +404,7 @@ final class Puzzle {
 
     // aStar
     public Puzzle aStar(String heuristic) {
-
+      
         setNodeCount(0);
         long startTime = System.nanoTime();
         HeuristicComparator comparator = heuristic(heuristic);

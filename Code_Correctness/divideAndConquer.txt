@@ -1,0 +1,6 @@
+setState n= 4
+printState
+randomizeState 200
+printState
+solve d&c
+printState
