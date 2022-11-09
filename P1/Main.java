@@ -86,7 +86,7 @@ public class Main {
         for (int i = 0; i < dataSample; i++) {
 
             Puzzle random = Puzzle.createFromString(startingState);
-            random.randomizeState(100);
+            random.randomizeState(20);
 
             Puzzle.maxNodes(String.valueOf(100 * i));
             Puzzle.disableMaxNodeError();
