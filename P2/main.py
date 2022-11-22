@@ -14,7 +14,9 @@ def main():
     data: DataFrame = data.replace(to_replace="setosa",value=1)
     data: DataFrame = data.replace(to_replace="versicolor",value=2)
     data: DataFrame = data.replace(to_replace="virginica",value=3)
-    exerciseOne(data)
+
+    #exerciseOne(data)
+    exerciseTwo(data)
     
 
 # Plot Data and Center Points
@@ -43,20 +45,17 @@ def customPlot(data: DataFrame,center_points: DataFrame):
 # Get k Random Starting Points
 def initiate_center_points(k: int, data: DataFrame):
     center_points = data.sample(k)
-    print(center_points)
     return center_points
 
 # Find the Distances between Points
 # I tried math.dist with no success
-def rsserr(a,b):
-    return np.square(np.sum((a-b)**2)) 
+def rsserr(x,y):
+    return np.square(np.sum((x-y)**2)) 
     
 # Assign Center Points
 def center_point_assignation(data: DataFrame, center_points: DataFrame):
     k: int = center_points.shape[0]
     n: int = data.shape[0]
-    print(k)
-    print(n)
     assignation = []
     assign_errors = []
 
@@ -130,14 +129,123 @@ def exerciseOne(startingData: DataFrame):
     # Selects petal_length and petal_width columns
     data: DataFrame = startingData[['petal_length','petal_width']].copy()
     np.random.seed(34352235)
-    data['center_point'], data['error'], center_points, error =  kmeans(data, k=3,tol=1e-4)
+    data['center_point'], data['error'], center_points, error =  kmeans(data, k=2,tol=1e-4)
     data.head()
     # Plots final clustering and error plot
     customPlot(data,center_points)
     errorPlot(error)
 
-def exerciseTwo():
+
+def singleLayer(Xs: np.ndarray, weights: np.ndarray):
+
+    y = np.zeros(len(Xs[0]))
+    # Sum across weights for all x values
+    for i in range(len(weights)):
+        for j in range(len(Xs[i])):
+            y[j] = y[j] + weights[i]*Xs[i][j]
+    
+    return y
+
+# Plot line and Data
+def plotXVsY(data: DataFrame, y):
+
+    customcmap = ListedColormap(["green","blue"])
+    fig, axis = plot.subplots(figsize=(8, 6))
+    
+    plot.plot(data['petal_length'],y)
+    plot.scatter(data['petal_length'], data['petal_width'],  marker = 'o', 
+                    c=data['species'].astype('category'), 
+                    cmap = customcmap, s=80)
+
+    axis.set_xlabel(r'petal_length', fontsize=20)
+    axis.set_ylabel(r'petal_width', fontsize=20)
+    plot.show(block=False)
+    plot.pause(5)
+    plot.close()
+
+# Classifies values of over or under y
+def simpleClassify(x: np.array,y: np.array):
+    length = len(x)
+    z = np.zeros(length)
+    for i in range(length):
+        z[i] = 1 if (x[i] > y[i]) else 0
+    return z
+
+# Code For Exercise Two
+def exerciseTwo(startingData: DataFrame):
     print("Exercise 2")
+    
+    data: DataFrame = startingData[['petal_length','petal_width','species']].copy()
+    
+    # Remove Setosa
+    removedAMount: int = len(data[(data['species'] == 1)])
+    data.drop(data[(data['species'] == 1)].index, inplace=True)
+    data.index = data.index - removedAMount
+
+
+    customcmap = ListedColormap(["green","blue"])
+    fig, axis = plot.subplots(figsize=(8, 6))
+    plot.scatter(data['petal_length'], data['petal_width'],  marker = 'o', 
+                    c=data['species'].astype('category'), 
+                    cmap = customcmap, s=80)
+
+    axis.set_xlabel(r'petal_length', fontsize=20)
+    axis.set_ylabel(r'petal_width', fontsize=20)
+    plot.show(block=False)
+    plot.pause(1)
+    plot.close()
+
+    # Weights
+    bias =2.75
+    weights = [bias,-1/5]
+    
+    xOne = data['petal_length'].to_numpy()
+    xZero =np.ones(len(data['petal_length'].to_numpy()))
+    Xs = [xZero, xOne]
+
+    line = singleLayer(Xs,weights)
+    plotXVsY(data,line)
+    
+    y = data['petal_width'].to_numpy()
+    data['classification'] = simpleClassify(y,line)
+    
+    fig = plot.figure(figsize = (8,6))
+    ax = plot.axes(projection='3d')
+    ax.grid()
+
+    data = data.sort_values(by='petal_length',ascending=True)
+    data = data.sort_values(by='petal_width',ascending=True)
+    data = data.sort_values(by='classification',ascending=True)
+    
+    ax.plot_trisurf(data['petal_length'],data['petal_width'],data['classification'])
+    ax.set_title('3D Iris Data Plot')
+
+    # Set axes label
+    ax.set_xlabel('petal_length', labelpad=20)
+    ax.set_ylabel('petal_width', labelpad=20)
+    ax.set_zlabel('Class', labelpad=20)
+    plot.show(block=False)
+    plot.pause(5)
+    plot.close()
+
+    # Uncomment to see all classifications
+    # print(data.to_string())
+
+    # Not Close
+    print("Not Close")
+    print(data.loc[0],"\n")
+    print(data.loc[85],"\n")
+
+    # Correct Close
+    print("Correct Close")
+    print(data.loc[18],"\n")
+    print(data.loc[92],"\n")
+
+    # Incorrect Close
+    print("Incorrect Close")
+    print(data.loc[20],"\n")
+    print(data.loc[84],"\n")
+    
 
 def exerciseThree():
     print("Exercise 3")
