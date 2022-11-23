@@ -1,3 +1,4 @@
+import math
 import numpy as np
 import pandas as pd
 from pandas import DataFrame
@@ -11,12 +12,14 @@ def main():
     # setosa = 1
     # versicolor = 2
     # virginica = 3
-    data: DataFrame = data.replace(to_replace="setosa",value=1)
-    data: DataFrame = data.replace(to_replace="versicolor",value=2)
-    data: DataFrame = data.replace(to_replace="virginica",value=3)
+    data: DataFrame = data.replace(to_replace="setosa",value=-1)
+    data: DataFrame = data.replace(to_replace="versicolor",value=0)
+    data: DataFrame = data.replace(to_replace="virginica",value=1)
 
     #exerciseOne(data)
-    exerciseTwo(data)
+    #exerciseTwo(data)
+    #exerciseThree(data)
+    exerciseFour(data)
     
 
 # Plot Data and Center Points
@@ -136,23 +139,26 @@ def exerciseOne(startingData: DataFrame):
     errorPlot(error)
 
 
-def singleLayer(Xs: np.ndarray, weights: np.ndarray):
+def singleLayer(Xs: np.ndarray, weight: np.ndarray):
 
-    y = np.zeros(len(Xs[0]))
+    y = np.zeros(len(Xs))
     # Sum across weights for all x values
-    for i in range(len(weights)):
-        for j in range(len(Xs[i])):
-            y[j] = y[j] + weights[i]*Xs[i][j]
+    #for i in range(len(weights)):
+    for j in range(len(Xs)):
+        y[j] = weight*Xs[j]
     
     return y
 
 # Plot line and Data
-def plotXVsY(data: DataFrame, y):
+def plotXVsY(data: DataFrame, Multithing, weight2):
 
     customcmap = ListedColormap(["green","blue"])
     fig, axis = plot.subplots(figsize=(8, 6))
     
-    plot.plot(data['petal_length'],y)
+    line = Multithing*-1/weight2
+
+
+    plot.plot(data['petal_length'],line)
     plot.scatter(data['petal_length'], data['petal_width'],  marker = 'o', 
                     c=data['species'].astype('category'), 
                     cmap = customcmap, s=80)
@@ -171,6 +177,16 @@ def simpleClassify(x: np.array,y: np.array):
         z[i] = 1 if (x[i] > y[i]) else 0
     return z
 
+def sigmoid(data,weights):
+    #print(data)
+    #print(data[0])
+    k = multiLine(data,weights)
+    #print(k)
+    t = np.zeros(len(k))
+    for i in range(len(k)):
+        t[i] = 1/(1+math.exp(-k[i]))
+    return t
+
 # Code For Exercise Two
 def exerciseTwo(startingData: DataFrame):
     print("Exercise 2")
@@ -178,8 +194,8 @@ def exerciseTwo(startingData: DataFrame):
     data: DataFrame = startingData[['petal_length','petal_width','species']].copy()
     
     # Remove Setosa
-    removedAMount: int = len(data[(data['species'] == 1)])
-    data.drop(data[(data['species'] == 1)].index, inplace=True)
+    removedAMount: int = len(data[(data['species'] == -1)])
+    data.drop(data[(data['species'] == -1)].index, inplace=True)
     data.index = data.index - removedAMount
 
 
@@ -196,28 +212,27 @@ def exerciseTwo(startingData: DataFrame):
     plot.close()
 
     # Weights
-    bias =2.75
-    weights = [bias,-1/5]
+    bias = -8.4
+    weight = [-8.4,1.35,1]
     
     xOne = data['petal_length'].to_numpy()
-    xZero =np.ones(len(data['petal_length'].to_numpy()))
-    Xs = [xZero, xOne]
-
-    line = singleLayer(Xs,weights)
-    plotXVsY(data,line)
+    xZero = np.ones(len(xOne))
+    xTwo = data['petal_width'].to_numpy()
+    line = singleLayer(xZero,bias)
+    line = line +singleLayer(xOne,weight[1])
     
-    y = data['petal_width'].to_numpy()
-    data['classification'] = simpleClassify(y,line)
+    plotXVsY(data,line,weight[2])
+    
+    
+    Xs = [xZero,xOne,xTwo]
+    data['classification'] = sigmoid(Xs,weight)
     
     fig = plot.figure(figsize = (8,6))
     ax = plot.axes(projection='3d')
     ax.grid()
 
-    data = data.sort_values(by='petal_length',ascending=True)
-    data = data.sort_values(by='petal_width',ascending=True)
-    data = data.sort_values(by='classification',ascending=True)
     
-    ax.plot_trisurf(data['petal_length'],data['petal_width'],data['classification'])
+    ax.plot_trisurf(data['petal_length'],data['petal_width'], data['classification'])
     ax.set_title('3D Iris Data Plot')
 
     # Set axes label
@@ -245,13 +260,104 @@ def exerciseTwo(startingData: DataFrame):
     print("Incorrect Close")
     print(data.loc[20],"\n")
     print(data.loc[84],"\n")
+
+def multiLine(data: np.ndarray,weights: np.ndarray):
+    y = np.zeros(len(data[0]))
+    for i in range (len(weights)):
+        y = y + singleLayer(data[i],weights[i])
+    return y
+    
+# Finds meanSquare
+def meanSquare(data: np.ndarray,weights: np.ndarray, patternClass: np.ndarray):
+    return 1/2 * sum(   np.power(sigmoid(data,weights) - patternClass , 2)    )
+
+def summedGradient(data: np.ndarray,weights: np.ndarray, patternClass: np.ndarray):
+    # print(sigmoidVal)
+    gradients = np.zeros(len(data))
+    sigmoidVal = sigmoid(data,weights)
+    for i in range(len(data)):
+        gradients[i] = sum((sigmoidVal - patternClass)*sigmoidVal*(1-sigmoidVal)*data[i])
+    return gradients
+# Code For Exercise Three
+def exerciseThree(startingData: DataFrame):
+    print("Exercise 3")
+    data: DataFrame = startingData[['petal_length','petal_width','species']].copy()
+    
+    # Remove Setosa
+    removedAMount: int = len(data[(data['species'] == -1)])
+    data.drop(data[(data['species'] == -1)].index, inplace=True)
+    data.index = data.index - removedAMount
+
+    xOne = data['petal_length'].to_numpy()
+    xZero = np.ones(len(data['petal_length'].to_numpy()))
+    xTwo = data['petal_width'].to_numpy() 
+    Xs = [xZero, xOne, xTwo]
+
+    
+    weights = [-8.4,1.35,1]
+    patternClass = data['species'].to_numpy()
+    error = meanSquare(Xs,weights,patternClass)
+    line1 = multiLine(Xs[0:2],weights[0:2])
+    print(error)
+    plotXVsY(data,line1,weights[2])
+
+    weights2 = [100,0.000000000000000000001,0.000000000000000000001]
+    print(meanSquare(Xs,weights2,patternClass))
+    line2 = multiLine(Xs[0:2],weights2[0:2])
+
+    plotXVsY(data,line2,weights[2])
+    
+    gradient = summedGradient(Xs,weights,patternClass)
+    #print(gradient)
+    N=2
+    epsilon = 0.001/N
+    newWeight=weights-epsilon*gradient
+    line3 = multiLine(Xs[0:2],newWeight[0:2])
+    print(meanSquare(Xs,weights,patternClass))
+    print(meanSquare(Xs,newWeight,patternClass))
+    #gradient
+    plotXVsY(data,line3,newWeight[2])
     
 
-def exerciseThree():
-    print("Exercise 3")
 
-def exerciseFour():
+
+
+
+
+def exerciseFour(startingData: DataFrame):
     print("Exercise 4")
+    data: DataFrame = startingData[['petal_length','petal_width','species']].copy()
+    
+    # Remove Setosa
+    removedAMount: int = len(data[(data['species'] == -1)])
+    data.drop(data[(data['species'] == -1)].index, inplace=True)
+    data.index = data.index - removedAMount
+
+    xOne = data['petal_length'].to_numpy()
+    xZero = np.ones(len(data['petal_length'].to_numpy()))
+    xTwo = data['petal_width'].to_numpy() 
+    Xs = [xZero, xOne, xTwo]
+    
+    N = 2
+    epsilon =0.01/N
+    tol=4.6
+    weights = [-6,1/7,2]
+    patternClass = data['species'].to_numpy()
+    stepCount = 0
+
+    line = multiLine(Xs[0:2],weights[0:2])
+    plotXVsY(data,line,weights[2])
+    while(meanSquare(Xs,weights,data['species'].to_numpy()) > tol):
+        line = multiLine(Xs[0:2],weights[0:2])
+
+        if(stepCount%5 ==0):
+            print(meanSquare(Xs,weights,data['species'].to_numpy()))
+            plotXVsY(data,line,weights[2])
+
+        weightChange = summedGradient(Xs,weights,patternClass)
+        weights = weights -epsilon*weightChange
+    print("worked")
+    plotXVsY(data,line,weights[2])
 
 def extraCredit():
     print("Extra Credit")
