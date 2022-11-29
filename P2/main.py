@@ -6,21 +6,29 @@ from pandas import DataFrame
 import matplotlib.pyplot as plot
 from matplotlib.colors import ListedColormap
 
+# Extra Credit imports
+import tensorflow as tf
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
+
+
 
 def main():
     
     data: DataFrame = pd.read_csv('P2\irisdata.csv')
-    # setosa = 1
-    # versicolor = 2
-    # virginica = 3
+    # setosa = -1
+    # versicolor = 0
+    # virginica = 1
     data: DataFrame = data.replace(to_replace="setosa",value=-1)
     data: DataFrame = data.replace(to_replace="versicolor",value=0)
     data: DataFrame = data.replace(to_replace="virginica",value=1)
 
     #exerciseOne(data)
-    exerciseTwo(data)
+    #exerciseTwo(data)
     #exerciseThree(data)
     #exerciseFour(data)
+    extraCredit(data)
+    
     
 
 # Plot Data and Center Points
@@ -374,8 +382,115 @@ def exerciseFour(startingData: DataFrame):
     plotXVsY(data,line,weights[2])
     errorPlot(Error)
 
-def extraCredit():
+def extraCredit(startingData: DataFrame):
     print("Extra Credit")
+    
+    data: DataFrame = startingData.copy()
 
+    # followed this tutorial
+    # https://medium.com/@nutanbhogendrasharma/tensorflow-deep-learning-model-with-iris-dataset-8ec344c49f91
+
+    # Input Data
+    X = data[['sepal_length','sepal_width','petal_length','petal_width']]
+    # Species
+    y = data['species']
+
+    # Species in 0,1,2
+    encoder =  LabelEncoder()
+    y1 = encoder.fit_transform(y)
+    Y = pd.get_dummies(y1).values
+    
+
+    # Trained base on input, class, traing size, seeding
+    X_train, X_test, y_train, y_test = train_test_split(X, Y, train_size=0.8, random_state=0)
+
+    # Generate and Compile model
+    model = tf.keras.Sequential([
+    tf.keras.layers.Dense(10, activation='relu'),
+    tf.keras.layers.Dense(10, activation='relu'),
+    tf.keras.layers.Dense(3, activation='softmax')
+    ])
+    
+    model.compile(optimizer='rmsprop',
+              loss='categorical_crossentropy',
+              metrics=['accuracy'])
+
+    # Fit the data based on the model
+    model.fit(X_train, y_train, batch_size=50, epochs=100)
+
+    loss, accuracy = model.evaluate(X_test, y_test, verbose=0)
+    print('Test loss:', loss)
+    print('Test accuracy:', accuracy)
+
+    y_pred = model.predict(X_test)
+
+    actual = np.argmax(y_test,axis=1)
+    predicted = np.argmax(y_pred,axis=1)
+    print(f"Actual: {actual}")
+    print(f"Predicted: {predicted}")
+
+
+    # Graphs Accuracy Vs. Training Size Vs. X size
+    # This take a min or 2
+    stepcount: int = 10
+    rangeVarData: range = range(1,len(X),stepcount)
+    rangeVarX: range = range(1,5)
+
+    allAcc = []
+
+    for j in rangeVarX:
+        acc = []
+
+        model_loop = tf.keras.Sequential([
+        tf.keras.layers.Dense(10, activation='relu'),
+        tf.keras.layers.Dense(10, activation='relu'),
+        tf.keras.layers.Dense(3, activation='softmax')
+        ])
+        model_loop.compile(optimizer='rmsprop',
+              loss='categorical_crossentropy',
+              metrics=['accuracy'])
+
+        for i in rangeVarData:
+            print(i)
+            X_train_loop, X_test_loop, y_train_loop, y_test_loop = train_test_split(X[X.columns[0:j]], Y, train_size=i, random_state=0)
+
+            if(X_test_loop.ndim ==1):
+                X_test_loop = [X_test_loop]
+            
+
+            model_loop.fit(X_train_loop, y_train_loop, batch_size=50, epochs=100,verbose=0)
+            loss, accuracy = model_loop.evaluate(X_test_loop, y_test_loop, verbose=0)
+            acc.append(accuracy)
+
+        print(acc)
+        fig, axis = plot.subplots(figsize=(8, 6))
+        plot.plot(rangeVarData, acc,  marker = 'o') 
+        
+        axis.set_xlabel(r'Training Size', fontsize=20)
+        axis.set_ylabel(r'Accuracy', fontsize=20)
+        plot.show(block=False)
+        plot.ylim((0,1.1))
+        plot.pause(10)
+        plot.close()
+
+        allAcc.append(acc)
+    
+    fig = plot.figure(figsize = (8,6))
+    ax = plot.axes(projection='3d')
+    ax.grid()
+
+    [XMesh,YMesh] = np.meshgrid(rangeVarX,rangeVarData)
+    
+    ax.plot_surface(XMesh,YMesh,np.transpose(np.array(allAcc)))
+    ax.set_title('3D Iris Data Plot')
+
+    # Set axes label
+    ax.set_xlabel('Input Data Array', labelpad=20)
+    ax.set_ylabel('Training Size', labelpad=20)
+    ax.set_zlabel('Accuracy', labelpad=20)
+    plot.show(block=False)
+    plot.pause(20)
+    plot.close()
+    
 if __name__ == "__main__":
     main()
