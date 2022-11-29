@@ -1,4 +1,5 @@
 import math
+import random
 import numpy as np
 import pandas as pd
 from pandas import DataFrame
@@ -17,9 +18,9 @@ def main():
     data: DataFrame = data.replace(to_replace="virginica",value=1)
 
     #exerciseOne(data)
-    #exerciseTwo(data)
+    exerciseTwo(data)
     #exerciseThree(data)
-    exerciseFour(data)
+    #exerciseFour(data)
     
 
 # Plot Data and Center Points
@@ -143,7 +144,6 @@ def singleLayer(Xs: np.ndarray, weight: np.ndarray):
 
     y = np.zeros(len(Xs))
     # Sum across weights for all x values
-    #for i in range(len(weights)):
     for j in range(len(Xs)):
         y[j] = weight*Xs[j]
     
@@ -165,23 +165,16 @@ def plotXVsY(data: DataFrame, Multithing, weight2):
 
     axis.set_xlabel(r'petal_length', fontsize=20)
     axis.set_ylabel(r'petal_width', fontsize=20)
+    plot.xlim((2.75,7.25))
+    plot.ylim((0.75,2.75))
     plot.show(block=False)
     plot.pause(5)
     plot.close()
 
-# Classifies values of over or under y
-def simpleClassify(x: np.array,y: np.array):
-    length = len(x)
-    z = np.zeros(length)
-    for i in range(length):
-        z[i] = 1 if (x[i] > y[i]) else 0
-    return z
-
+# Calulates sigmoid
 def sigmoid(data,weights):
-    #print(data)
-    #print(data[0])
+   
     k = multiLine(data,weights)
-    #print(k)
     t = np.zeros(len(k))
     for i in range(len(k)):
         t[i] = 1/(1+math.exp(-k[i]))
@@ -243,28 +236,39 @@ def exerciseTwo(startingData: DataFrame):
     plot.pause(5)
     plot.close()
 
+
+   
     # Uncomment to see all classifications
-    # print(data.to_string())
+    # sorteddata =data.sort_values(by=['classification'], ascending=True)
+    # print(sorteddata.to_string())
 
     # Not Close
     print("Not Close")
-    print(data.loc[0],"\n")
+    print(data.loc[48],"\n")
     print(data.loc[85],"\n")
 
     # Correct Close
     print("Correct Close")
-    print(data.loc[18],"\n")
+    print(data.loc[2],"\n")
     print(data.loc[92],"\n")
 
     # Incorrect Close
     print("Incorrect Close")
-    print(data.loc[20],"\n")
-    print(data.loc[84],"\n")
+    print(data.loc[33],"\n")
+    print(data.loc[69],"\n")
 
 def multiLine(data: np.ndarray,weights: np.ndarray):
-    y = np.zeros(len(data[0]))
-    for i in range (len(weights)):
-        y = y + singleLayer(data[i],weights[i])
+    
+    data = np.array(data)
+    if(data.ndim == 1):
+        y = np.zeros(len(data))
+        y = singleLayer(data,weights)
+    else:
+        y = np.zeros(len(data[0]))
+        for i in range (len(weights)):
+            y = y + singleLayer(data[i],weights[i])
+    
+    
     return y
     
 # Finds meanSquare
@@ -272,11 +276,12 @@ def meanSquare(data: np.ndarray,weights: np.ndarray, patternClass: np.ndarray):
     return 1/2 * sum(   np.power(sigmoid(data,weights) - patternClass , 2)    )
 
 def summedGradient(data: np.ndarray,weights: np.ndarray, patternClass: np.ndarray):
-    # print(sigmoidVal)
-    gradients = np.zeros(len(data))
-    sigmoidVal = sigmoid(data,weights)
+    gradients = np.zeros(len(weights))
+    sigmoidTotal = sigmoid(data,weights)
     for i in range(len(data)):
-        gradients[i] = sum((sigmoidVal - patternClass)*sigmoidVal*(1-sigmoidVal)*data[i])
+        sigmoidofI = sigmoid(data[i],weights[i])
+        gradients[i] = sum((sigmoidTotal - patternClass)*sigmoidofI*(1-sigmoidofI)*data[i])
+
     return gradients
 # Code For Exercise Three
 def exerciseThree(startingData: DataFrame):
@@ -301,16 +306,15 @@ def exerciseThree(startingData: DataFrame):
     print(error)
     plotXVsY(data,line1,weights[2])
 
-    weights2 = [100,0.000000000000000000001,0.000000000000000000001]
+    weights2 = [-2,0.000000000000000000001,0.000000000000000000001]
     print(meanSquare(Xs,weights2,patternClass))
     line2 = multiLine(Xs[0:2],weights2[0:2])
 
     plotXVsY(data,line2,weights[2])
     
     gradient = summedGradient(Xs,weights,patternClass)
-    #print(gradient)
     N=2
-    epsilon = 0.001/N
+    epsilon = 0.1/N
     newWeight=weights-epsilon*gradient
     line3 = multiLine(Xs[0:2],newWeight[0:2])
     print(meanSquare(Xs,weights,patternClass))
@@ -318,11 +322,6 @@ def exerciseThree(startingData: DataFrame):
     #gradient
     plotXVsY(data,line3,newWeight[2])
     
-
-
-
-
-
 
 def exerciseFour(startingData: DataFrame):
     print("Exercise 4")
@@ -333,31 +332,47 @@ def exerciseFour(startingData: DataFrame):
     data.drop(data[(data['species'] == -1)].index, inplace=True)
     data.index = data.index - removedAMount
 
+    # Generate Pattern Vector X
     xOne = data['petal_length'].to_numpy()
     xZero = np.ones(len(data['petal_length'].to_numpy()))
     xTwo = data['petal_width'].to_numpy() 
-    Xs = [xZero, xOne, xTwo]
+    Xs: np.ndarray = [xZero, xOne, xTwo]
     
     N = 2
     epsilon =0.01/N
-    tol=4.6
-    weights = [-6,1/7,2]
+    tol=4.4
+    # Bad weights to learn from
+    #weights: np.ndarray = [-8.4,1.35,1]
+    weights: np.ndarray = [random.uniform(-8,-9),random.uniform(0.9,1.5),random.uniform(0.8,1.2)]
     patternClass = data['species'].to_numpy()
     stepCount = 0
 
-    line = multiLine(Xs[0:2],weights[0:2])
+    line: np.ndarray = multiLine(Xs[0:2],weights[0:2])
+
+    Error: list = []
+
+    Error.append(meanSquare(Xs,weights,data['species'].to_numpy()))
+    
     plotXVsY(data,line,weights[2])
-    while(meanSquare(Xs,weights,data['species'].to_numpy()) > tol):
+    errorPlot(Error)
+    print(weights)
+     
+    while(Error[len(Error)-1] > tol):
+        stepCount = stepCount +1
         line = multiLine(Xs[0:2],weights[0:2])
 
-        if(stepCount%5 ==0):
+        if(stepCount%25==0):
             print(meanSquare(Xs,weights,data['species'].to_numpy()))
             plotXVsY(data,line,weights[2])
+            errorPlot(Error)
 
         weightChange = summedGradient(Xs,weights,patternClass)
         weights = weights -epsilon*weightChange
+        Error.append(meanSquare(Xs,weights,data['species'].to_numpy()))
+
     print("worked")
     plotXVsY(data,line,weights[2])
+    errorPlot(Error)
 
 def extraCredit():
     print("Extra Credit")
